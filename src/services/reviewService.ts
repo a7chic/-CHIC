@@ -1,64 +1,70 @@
 import {
 collection,
 addDoc,
-getDocs,
 query,
-where
+where,
+getDocs,
+serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
+export const addReview=async(
 
-// إضافة تقييم
-export const addReview = async(
 productId:string,
+
 userId:string,
+
 rating:number,
+
 comment:string
+
 )=>{
 
 await addDoc(
+
 collection(db,"reviews"),
+
 {
+
 productId,
+
 userId,
+
 rating,
+
 comment,
-createdAt:new Date()
+
+createdAt:serverTimestamp()
+
 }
+
 );
 
 };
 
+export const getReviews=async(
 
-
-// جلب تقييمات المنتج
-export const getReviews = async(
 productId:string
+
 )=>{
 
-
 const q=query(
+
 collection(db,"reviews"),
-where(
-"productId",
-"==",
-productId
-)
+
+where("productId","==",productId)
+
 );
-
-
 
 const snapshot=await getDocs(q);
 
+return snapshot.docs.map(doc=>({
 
+id:doc.id,
 
-return snapshot.docs.map(
-item=>({
-id:item.id,
-...item.data()
-})
-);
+...doc.data()
 
+}));
 
 };
