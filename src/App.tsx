@@ -1,7 +1,84 @@
-import Router from "./router";
+import React from "react";
+import {
+BrowserRouter,
+Routes,
+Route,
+Navigate
+} from "react-router-dom";
 
-export default function App(){
+import MainLayout from "./layouts/MainLayout";
 
-return <Router/>;
+import Home from "./pages/Home";
+import Haraj from "./pages/Haraj";
+import Catalog from "./pages/Catalog";
+import Favorites from "./pages/Favorites";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
+
+
+export default function App() {
+
+return (
+
+<BrowserRouter>
+
+<Routes>
+
+
+<Route
+path="/"
+element={<Navigate to="/home" />}
+/>
+
+
+<Route
+element={<MainLayout />}
+>
+
+
+<Route
+path="/home"
+element={<Home />}
+/>
+
+
+<Route
+path="/haraj"
+element={<Haraj />}
+/>
+
+
+<Route
+path="/catalog"
+element={<Catalog />}
+/>
+
+
+<Route
+path="/favorites"
+element={<Favorites />}
+/>
+
+
+<Route
+path="/notifications"
+element={<Notifications />}
+/>
+
+
+<Route
+path="/profile"
+element={<Profile />}
+/>
+
+
+</Route>
+
+
+</Routes>
+
+</BrowserRouter>
+
+);
 
 }
