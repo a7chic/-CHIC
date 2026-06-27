@@ -1,220 +1,202 @@
 import {
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-  query,
-  orderBy,
-  increment
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+updateDoc,
+query,
+orderBy,
+increment,
+where
 } from "firebase/firestore";
 
-import { db } from "../firebase/config";
+import {db} from "../firebase/config";
 
+export const addProduct=async(data:any)=>{
 
+await addDoc(
 
-// إضافة إعلان جديد
-export const addProduct = async (
-  data:{
-    title:string;
-    description:string;
-    price:string;
-    category:string;
-    image?:string;
-    ownerId:string;
-    city?:string;
-    brand?:string;
-    condition?:string;
-  }
-) => {
+collection(db,"products"),
 
-  await addDoc(
-    collection(db,"products"),
-    {
-      ...data,
-      likes:0,
-      views:0,
-      sold:false,
-      featured:false,
-      verified:false,
-      createdAt:new Date()
-    }
-  );
+{
+...data,
+likes:0,
+views:0,
+sold:false,
+featured:false,
+verified:false,
+createdAt:new Date()
+}
+
+);
 
 };
 
+export const getProducts=async()=>{
 
+const q=query(
 
-// جلب جميع الإعلانات
-export const getProducts = async () => {
+collection(db,"products"),
 
-  const q = query(
-    collection(db,"products"),
-    orderBy("createdAt","desc")
-  );
+orderBy("createdAt","desc")
 
-  const snapshot = await getDocs(q);
+);
 
-  return snapshot.docs.map(item=>({
+const snapshot=await getDocs(q);
 
-    id:item.id,
+return snapshot.docs.map(doc=>({
 
-    ...item.data()
+id:doc.id,
 
-  }));
+...doc.data()
 
-};
-
-
-
-// تحديث إعلان
-export const updateProduct = async (
-
-  id:string,
-
-  data:object
-
-)=>{
-
-  await updateDoc(
-
-    doc(db,"products",id),
-
-    data
-
-  );
+}));
 
 };
 
+export const getFeaturedProducts=async()=>{
 
+const q=query(
 
-// حذف إعلان
-export const deleteProduct = async (
+collection(db,"products"),
 
-  id:string
+where("featured","==",true)
 
-)=>{
+);
 
-  await deleteDoc(
+const snapshot=await getDocs(q);
 
-    doc(db,"products",id)
+return snapshot.docs.map(doc=>({
 
-  );
+id:doc.id,
 
-};
+...doc.data()
 
-
-
-// زيادة عدد المشاهدات
-export const increaseViews = async (
-
-  id:string
-
-)=>{
-
-  await updateDoc(
-
-    doc(db,"products",id),
-
-    {
-
-      views:increment(1)
-
-    }
-
-  );
+}));
 
 };
 
+export const getVerifiedProducts=async()=>{
 
+const q=query(
 
-// زيادة الإعجابات
-export const increaseLikes = async (
+collection(db,"products"),
 
-  id:string
+where("verified","==",true)
 
-)=>{
+);
 
-  await updateDoc(
+const snapshot=await getDocs(q);
 
-    doc(db,"products",id),
+return snapshot.docs.map(doc=>({
 
-    {
+id:doc.id,
 
-      likes:increment(1)
+...doc.data()
 
-    }
-
-  );
-
-};
-
-
-
-// جعل الإعلان مباع
-export const markAsSold = async (
-
-  id:string
-
-)=>{
-
-  await updateDoc(
-
-    doc(db,"products",id),
-
-    {
-
-      sold:true
-
-    }
-
-  );
+}));
 
 };
 
+export const updateProduct=async(id:string,data:any)=>{
 
+await updateDoc(
 
-// تمييز الإعلان
-export const featureProduct = async (
+doc(db,"products",id),
 
-  id:string
+data
 
-)=>{
-
-  await updateDoc(
-
-    doc(db,"products",id),
-
-    {
-
-      featured:true
-
-    }
-
-  );
+);
 
 };
 
+export const deleteProduct=async(id:string)=>{
 
+await deleteDoc(
 
-// توثيق الإعلان
-export const verifyProduct = async (
+doc(db,"products",id)
 
-  id:string
+);
 
-)=>{
+};
 
-  await updateDoc(
+export const increaseViews=async(id:string)=>{
 
-    doc(db,"products",id),
+await updateDoc(
 
-    {
+doc(db,"products",id),
 
-      verified:true
+{
 
-    }
+views:increment(1)
 
-  );
+}
+
+);
+
+};
+
+export const increaseLikes=async(id:string)=>{
+
+await updateDoc(
+
+doc(db,"products",id),
+
+{
+
+likes:increment(1)
+
+}
+
+);
+
+};
+
+export const markAsSold=async(id:string)=>{
+
+await updateDoc(
+
+doc(db,"products",id),
+
+{
+
+sold:true
+
+}
+
+);
+
+};
+
+export const featureProduct=async(id:string)=>{
+
+await updateDoc(
+
+doc(db,"products",id),
+
+{
+
+featured:true
+
+}
+
+);
+
+};
+
+export const verifyProduct=async(id:string)=>{
+
+await updateDoc(
+
+doc(db,"products",id),
+
+{
+
+verified:true
+
+}
+
+);
 
 };
