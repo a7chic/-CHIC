@@ -1,56 +1,60 @@
-import RoyalButton from "../components/RoyalButton";
+import Layout from "../components/Layout";
+import {RoyalButton,RoyalCard,RoyalInput} from "../components/UI";
 
 export default function Login(){
 
 return(
 
+<Layout title="بوابة الدخول">
+
 <div
 style={{
-maxWidth:"550px",
-margin:"40px auto",
-background:"#111",
-padding:"30px",
-borderRadius:"20px",
-border:"1px solid #d4af37"
+maxWidth:"700px",
+margin:"0 auto"
 }}
 >
+
+<RoyalCard>
 
 <h1
 style={{
 textAlign:"center",
-color:"#d4af37",
-marginBottom:"25px"
+color:"#D4AF37",
+marginBottom:"30px"
 }}
 >
 
-بوابة الدخول
+🔐 بوابات الدخول
 
 </h1>
 
-<input
-placeholder="البريد الإلكتروني"
-style={{
-width:"100%",
-padding:"15px",
-marginBottom:"15px",
-borderRadius:"10px"
-}}
-/>
+<RoyalInput placeholder="البريد الإلكتروني"/>
 
-<input
+<RoyalInput
 type="password"
 placeholder="كلمة المرور"
-style={{
-width:"100%",
-padding:"15px",
-marginBottom:"20px",
-borderRadius:"10px"
-}}
 />
 
-<RoyalButton title="تسجيل الدخول"/>
+<div
+style={{
+display:"grid",
+gap:"15px"
+}}
+>
+
+<RoyalButton title="👑 دخول صاحب الموقع"/>
+
+<RoyalButton title="🛡️ دخول المشرفين"/>
+
+<RoyalButton title="👤 دخول الزوار"/>
 
 </div>
+
+</RoyalCard>
+
+</div>
+
+</Layout>
 
 );
 
