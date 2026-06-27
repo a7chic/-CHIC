@@ -1,68 +1,82 @@
 import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc
+doc,
+getDoc,
+setDoc,
+updateDoc,
+serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
-
-// إنشاء ملف مستخدم
 export const createUserProfile = async (
-  uid:string,
-  data:{
-    name?:string;
-    email:string;
-    phone?:string;
-    role?:string;
-  }
-) => {
+uid:string,
+data:any
+)=>{
 
-  await setDoc(
-    doc(db,"users",uid),
-    {
-      ...data,
-      createdAt:new Date()
-    }
-  );
+await setDoc(
+doc(db,"users",uid),
+{
+...data,
+member:"عادية",
+verified:false,
+createdAt:serverTimestamp()
+}
+);
 
 };
 
-
-
-// جلب بيانات المستخدم
 export const getUserProfile = async (
-  uid:string
-) => {
+uid:string
+)=>{
 
-  const snapshot = await getDoc(
-    doc(db,"users",uid)
-  );
+const snapshot=await getDoc(
+doc(db,"users",uid)
+);
 
+if(!snapshot.exists()) return null;
 
-  if(snapshot.exists()){
-
-    return snapshot.data();
-
-  }
-
-
-  return null;
+return{
+id:snapshot.id,
+...snapshot.data()
+};
 
 };
 
+export const updateUserProfile = async(
+uid:string,
+data:any
+)=>{
 
+await updateDoc(
+doc(db,"users",uid),
+data
+);
 
-// تحديث بيانات المستخدم
-export const updateUserProfile = async (
-  uid:string,
-  data:object
-) => {
+};
 
-  await updateDoc(
-    doc(db,"users",uid),
-    data
-  );
+export const verifyUser = async(
+uid:string
+)=>{
+
+await updateDoc(
+doc(db,"users",uid),
+{
+verified:true
+}
+);
+
+};
+
+export const upgradeMembership = async(
+uid:string,
+member:string
+)=>{
+
+await updateDoc(
+doc(db,"users",uid),
+{
+member
+}
+);
 
 };
