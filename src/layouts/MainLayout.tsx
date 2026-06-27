@@ -1,40 +1,52 @@
 import React from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { logoutUser } from "../services/authService";
 
-const menu = [
-  { title: "الرئيسية", path: "/home", icon: "🏠" },
-  { title: "الحراج", path: "/haraj", icon: "🛒" },
-  { title: "الكتالوج", path: "/catalog", icon: "👗" },
-  { title: "المفضلة", path: "/favorites", icon: "❤️" },
-  { title: "الإشعارات", path: "/notifications", icon: "🔔" },
-  { title: "حسابي", path: "/profile", icon: "👤" },
+const menu=[
+{title:"الرئيسية",path:"/home",icon:"🏠"},
+{title:"الحراج",path:"/haraj",icon:"🛒"},
+{title:"الكتالوج",path:"/catalog",icon:"👗"},
+{title:"المفضلة",path:"/favorites",icon:"❤️"},
+{title:"الإشعارات",path:"/notifications",icon:"🔔"},
+{title:"إضافة إعلان",path:"/add-product",icon:"➕"},
+{title:"حسابي",path:"/profile",icon:"👤"}
 ];
 
-export default function MainLayout() {
+export default function MainLayout(){
 
-const location = useLocation();
+const location=useLocation();
 
-return (
+const navigate=useNavigate();
+
+const logout=async()=>{
+
+await logoutUser();
+
+navigate("/login");
+
+};
+
+return(
 
 <div
 style={{
 background:"#050505",
-color:"#fff",
 minHeight:"100vh",
 display:"flex",
-flexDirection:"column"
+flexDirection:"column",
+color:"#fff"
 }}
 >
 
 <header
 style={{
 height:"70px",
-display:"flex",
-alignItems:"center",
-justifyContent:"space-between",
-padding:"0 20px",
 background:"#111",
-borderBottom:"2px solid #D4AF37"
+borderBottom:"2px solid #D4AF37",
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+padding:"0 25px"
 }}
 >
 
@@ -49,31 +61,79 @@ color:"#D4AF37"
 
 </h2>
 
+<div
+style={{
+display:"flex",
+gap:"10px"
+}}
+>
 
-<div>
+<button
+onClick={()=>navigate("/notifications")}
+style={{
+background:"#222",
+color:"#fff",
+border:"1px solid #444",
+padding:"10px 14px",
+borderRadius:"10px",
+cursor:"pointer"
+}}
+>
 
-🔔 👤
+🔔
+
+</button>
+
+<button
+onClick={()=>navigate("/profile")}
+style={{
+background:"#222",
+color:"#fff",
+border:"1px solid #444",
+padding:"10px 14px",
+borderRadius:"10px",
+cursor:"pointer"
+}}
+>
+
+👤
+
+</button>
+
+<button
+onClick={logout}
+style={{
+background:"#D4AF37",
+color:"#000",
+border:"none",
+padding:"10px 18px",
+borderRadius:"10px",
+fontWeight:"bold",
+cursor:"pointer"
+}}
+>
+
+خروج
+
+</button>
 
 </div>
 
-
 </header>
-
 
 <div
 style={{
 background:"#D4AF37",
 color:"#000",
-padding:"10px",
+padding:"12px",
 fontWeight:"bold",
 textAlign:"center"
 }}
 >
 
-🎉 أهلاً بك في منصة أناقة CHIC الملكية
+✨ مرحباً بك في منصة ANAQA CHIC الفاخرة ✨
 
 </div>
-
 
 <div
 style={{
@@ -81,7 +141,6 @@ display:"flex",
 flex:1
 }}
 >
-
 
 <aside
 style={{
@@ -92,8 +151,7 @@ borderLeft:"1px solid #333"
 }}
 >
 
-
-{menu.map((item)=>(
+{menu.map(item=>(
 
 <Link
 key={item.path}
@@ -104,15 +162,15 @@ padding:"14px",
 marginBottom:"12px",
 borderRadius:"12px",
 textDecoration:"none",
+fontWeight:"bold",
 background:
 location.pathname===item.path
-? "#D4AF37"
-: "#1d1d1d",
+?"#D4AF37"
+:"#1d1d1d",
 color:
 location.pathname===item.path
-? "#000"
-: "#fff",
-fontWeight:"bold"
+?"#000"
+:"#fff"
 }}
 >
 
@@ -122,117 +180,21 @@ fontWeight:"bold"
 
 ))}
 
-
 </aside>
-
-
 
 <main
 style={{
 flex:1,
 padding:"25px",
-overflowY:"auto",
-background:"#050505"
+overflowY:"auto"
 }}
 >
-
-
-<div
-style={{
-display:"grid",
-gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",
-gap:"20px",
-marginBottom:"25px"
-}}
->
-
-
-{[
-["👥","المستخدمون","0"],
-["🛒","الإعلانات","0"],
-["👑","المشرفون","0"],
-["💬","التعليقات","0"]
-].map((item)=>(
-
-
-<div
-key={item[1]}
-style={{
-background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"18px",
-padding:"25px"
-}}
->
-
-
-<div
-style={{
-fontSize:"40px"
-}}
->
-
-{item[0]}
-
-</div>
-
-
-<h2
-style={{
-marginTop:"10px"
-}}
->
-
-{item[1]}
-
-</h2>
-
-
-<h1
-style={{
-color:"#D4AF37",
-marginTop:"10px"
-}}
->
-
-{item[2]}
-
-</h1>
-
-
-</div>
-
-
-))}
-
-
-</div>
-
-
-
-<div
-style={{
-background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"18px",
-padding:"20px",
-minHeight:"500px"
-}}
->
-
 
 <Outlet/>
 
-
-</div>
-
-
 </main>
 
-
 </div>
-
-
 
 <footer
 style={{
@@ -250,7 +212,6 @@ color:"#D4AF37"
 © 2026 ANAQA CHIC
 
 </footer>
-
 
 </div>
 
