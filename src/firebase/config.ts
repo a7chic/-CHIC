@@ -1,30 +1,41 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+
 
 const firebaseConfig = {
 
-apiKey: "",
+apiKey: "ضع_API_KEY_هنا",
 
-authDomain: "",
+authDomain: "ضع_AUTH_DOMAIN_هنا",
 
-projectId: "",
+projectId: "ضع_PROJECT_ID_هنا",
 
-storageBucket: "",
+storageBucket: "ضع_STORAGE_BUCKET_هنا",
 
-messagingSenderId: "",
+messagingSenderId: "ضع_MESSAGING_SENDER_ID_هنا",
 
-appId: ""
+appId: "ضع_APP_ID_هنا"
 
 };
 
+
+
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
 
-export const db = getFirestore(app);
+const db = getFirestore(app);
 
-export const storage = getStorage(app);
+const auth = getAuth(app);
 
-export default app;
+const storage = getStorage(app);
+
+
+
+export {
+app,
+db,
+auth,
+storage
+};
