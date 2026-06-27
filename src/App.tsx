@@ -1,5 +1,7 @@
-import Dashboard from "./layouts/Dashboard";
+import Router from "./router";
 
-export default function App() {
-  return <Dashboard />;
+export default function App(){
+
+return <Router/>;
+
 }
