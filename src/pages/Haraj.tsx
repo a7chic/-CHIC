@@ -1,43 +1,102 @@
-import Layout from "../components/Layout";
-import QuickCard from "../components/QuickCard";
+import { Box, Card, CardContent, Chip, Grid, Typography } from "@mui/material";
 
-export default function Haraj(){
+const ads = [
+  {
+    id: 1,
+    title: "ساعة رولكس أصلية",
+    city: "الرياض",
+    price: "12,500 ريال",
+  },
+  {
+    id: 2,
+    title: "سيارة لكزس ES",
+    city: "جدة",
+    price: "145,000 ريال",
+  },
+  {
+    id: 3,
+    title: "فيلا للبيع",
+    city: "الخبر",
+    price: "2,350,000 ريال",
+  },
+  {
+    id: 4,
+    title: "جهاز MacBook Pro",
+    city: "الدمام",
+    price: "7,900 ريال",
+  },
+];
 
-return(
+export default function Haraj() {
+  return (
+    <Box>
 
-<Layout title="منصة حراج">
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        mb={1}
+      >
+        حراج أناقة CHIC
+      </Typography>
 
-<h1
-style={{
-color:"#D4AF37",
-marginBottom:"25px"
-}}
->
+      <Typography
+        color="text.secondary"
+        mb={4}
+      >
+        منصة احترافية للإعلانات المبوبة والبيع والشراء.
+      </Typography>
 
-🛒 منصة حراج أناقة CHIC
+      <Grid container spacing={3}>
+        {ads.map((item) => (
+          <Grid item xs={12} md={6} lg={4} key={item.id}>
+            <Card
+              sx={{
+                borderRadius: 4,
+                transition: ".3s",
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                  boxShadow: 8,
+                },
+              }}
+            >
+              <CardContent>
 
-</h1>
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                >
+                  {item.title}
+                </Typography>
 
-<div
-style={{
-display:"grid",
-gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
-gap:"20px"
-}}
->
+                <Typography
+                  sx={{ mt: 1 }}
+                  color="text.secondary"
+                >
+                  {item.city}
+                </Typography>
 
-<QuickCard icon="➕" title="إضافة إعلان"/>
+                <Typography
+                  sx={{
+                    mt: 2,
+                    color: "#b8860b",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {item.price}
+                </Typography>
 
-<QuickCard icon="🔥" title="أحدث الإعلانات"/>
+                <Chip
+                  label="إعلان موثق"
+                  color="success"
+                  sx={{ mt: 2 }}
+                />
 
-<QuickCard icon="⭐" title="الإعلانات المميزة"/>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-<QuickCard icon="🏷️" title="الأقسام"/>
-
-</div>
-
-</Layout>
-
-);
-
+    </Box>
+  );
 }
