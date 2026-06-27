@@ -1,55 +1,68 @@
 import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  orderBy
+collection,
+addDoc,
+query,
+where,
+getDocs,
+serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
+export const sendNotification=async(
 
-// إنشاء إشعار
-export const createNotification = async (
-  userId:string,
-  message:string
-) => {
+uid:string,
 
-  await addDoc(
-    collection(db,"notifications"),
-    {
-      userId,
-      message,
-      read:false,
-      createdAt:new Date()
-    }
-  );
+title:string,
+
+message:string
+
+)=>{
+
+await addDoc(
+
+collection(db,"notifications"),
+
+{
+
+uid,
+
+title,
+
+message,
+
+read:false,
+
+createdAt:serverTimestamp()
+
+}
+
+);
 
 };
 
+export const getNotifications=async(
 
+uid:string
 
-// جلب إشعارات المستخدم
-export const getNotifications = async (
-  userId:string
-) => {
+)=>{
 
-  const q = query(
-    collection(db,"notifications"),
-    where("userId","==",userId),
-    orderBy("createdAt","desc")
-  );
+const q=query(
 
+collection(db,"notifications"),
 
-  const snapshot = await getDocs(q);
+where("uid","==",uid)
 
+);
 
-  return snapshot.docs.map(
-    item=>({
-      id:item.id,
-      ...item.data()
-    })
-  );
+const snapshot=await getDocs(q);
+
+return snapshot.docs.map(doc=>({
+
+id:doc.id,
+
+...doc.data()
+
+}));
 
 };
