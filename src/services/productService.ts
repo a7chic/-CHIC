@@ -6,13 +6,15 @@ import {
   doc,
   updateDoc,
   query,
-  orderBy
+  orderBy,
+  increment
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
 
-// إضافة منتج / إعلان
+
+// إضافة إعلان جديد
 export const addProduct = async (
   data:{
     title:string;
@@ -21,6 +23,9 @@ export const addProduct = async (
     category:string;
     image?:string;
     ownerId:string;
+    city?:string;
+    brand?:string;
+    condition?:string;
   }
 ) => {
 
@@ -28,6 +33,11 @@ export const addProduct = async (
     collection(db,"products"),
     {
       ...data,
+      likes:0,
+      views:0,
+      sold:false,
+      featured:false,
+      verified:false,
       createdAt:new Date()
     }
   );
@@ -36,7 +46,7 @@ export const addProduct = async (
 
 
 
-// جلب جميع المنتجات
+// جلب جميع الإعلانات
 export const getProducts = async () => {
 
   const q = query(
@@ -44,43 +54,167 @@ export const getProducts = async () => {
     orderBy("createdAt","desc")
   );
 
-
   const snapshot = await getDocs(q);
 
+  return snapshot.docs.map(item=>({
 
-  return snapshot.docs.map(
-    item => ({
-      id:item.id,
-      ...item.data()
-    })
-  );
+    id:item.id,
 
-};
+    ...item.data()
 
-
-
-// حذف منتج
-export const deleteProduct = async (
-  id:string
-) => {
-
-  await deleteDoc(
-    doc(db,"products",id)
-  );
+  }));
 
 };
 
 
 
-// تحديث منتج
+// تحديث إعلان
 export const updateProduct = async (
+
   id:string,
+
   data:object
-) => {
+
+)=>{
 
   await updateDoc(
+
     doc(db,"products",id),
+
     data
+
+  );
+
+};
+
+
+
+// حذف إعلان
+export const deleteProduct = async (
+
+  id:string
+
+)=>{
+
+  await deleteDoc(
+
+    doc(db,"products",id)
+
+  );
+
+};
+
+
+
+// زيادة عدد المشاهدات
+export const increaseViews = async (
+
+  id:string
+
+)=>{
+
+  await updateDoc(
+
+    doc(db,"products",id),
+
+    {
+
+      views:increment(1)
+
+    }
+
+  );
+
+};
+
+
+
+// زيادة الإعجابات
+export const increaseLikes = async (
+
+  id:string
+
+)=>{
+
+  await updateDoc(
+
+    doc(db,"products",id),
+
+    {
+
+      likes:increment(1)
+
+    }
+
+  );
+
+};
+
+
+
+// جعل الإعلان مباع
+export const markAsSold = async (
+
+  id:string
+
+)=>{
+
+  await updateDoc(
+
+    doc(db,"products",id),
+
+    {
+
+      sold:true
+
+    }
+
+  );
+
+};
+
+
+
+// تمييز الإعلان
+export const featureProduct = async (
+
+  id:string
+
+)=>{
+
+  await updateDoc(
+
+    doc(db,"products",id),
+
+    {
+
+      featured:true
+
+    }
+
+  );
+
+};
+
+
+
+// توثيق الإعلان
+export const verifyProduct = async (
+
+  id:string
+
+)=>{
+
+  await updateDoc(
+
+    doc(db,"products",id),
+
+    {
+
+      verified:true
+
+    }
+
   );
 
 };
