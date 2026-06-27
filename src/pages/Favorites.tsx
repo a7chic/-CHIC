@@ -1,8 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
+import { getProducts } from "../services/productService";
 
-export default function Favorites() {
+export default function Favorites(){
 
-return (
+const navigate=useNavigate();
+
+const [favorites,setFavorites]=useState<any[]>([]);
+
+useEffect(()=>{
+
+const load=async()=>{
+
+const ids:string[]=JSON.parse(
+
+localStorage.getItem("favorites")||"[]"
+
+);
+
+const products:any[]=await getProducts();
+
+setFavorites(
+
+products.filter(
+
+item=>ids.includes(item.id)
+
+)
+
+);
+
+};
+
+load();
+
+},[]);
+
+return(
 
 <div
 style={{
@@ -10,21 +45,22 @@ color:"#fff"
 }}
 >
 
-
 <div
 style={{
-background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"20px",
-padding:"30px",
-marginBottom:"25px"
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+marginBottom:"25px",
+flexWrap:"wrap"
 }}
 >
 
+<div>
 
 <h1
 style={{
-color:"#D4AF37"
+color:"#D4AF37",
+margin:0
 }}
 >
 
@@ -32,37 +68,55 @@ color:"#D4AF37"
 
 </h1>
 
-
 <p
 style={{
-color:"#ccc",
-fontSize:"18px"
+color:"#aaa"
 }}
 >
 
-المنتجات والإعلانات التي قمت بحفظها ستظهر هنا
+العناصر المحفوظة: {favorites.length}
 
 </p>
 
+</div>
+
+<button
+onClick={()=>navigate("/haraj")}
+style={{
+background:"#D4AF37",
+border:"none",
+padding:"12px 22px",
+borderRadius:"10px",
+fontWeight:"bold",
+cursor:"pointer"
+}}
+>
+
+🛒 الذهاب للحراج
+
+</button>
 
 </div>
 
+{
 
+favorites.length===0?
+
+(
 
 <div
 style={{
 background:"#111",
 border:"1px solid #D4AF37",
-borderRadius:"18px",
-padding:"40px",
+borderRadius:"20px",
+padding:"60px",
 textAlign:"center"
 }}
 >
 
-
 <div
 style={{
-fontSize:"60px"
+fontSize:"70px"
 }}
 >
 
@@ -70,31 +124,73 @@ fontSize:"60px"
 
 </div>
 
-
 <h2
 style={{
 color:"#D4AF37"
 }}
 >
 
-لا توجد عناصر محفوظة حالياً
+لا توجد منتجات محفوظة
 
 </h2>
 
-
 <p
 style={{
-color:"#aaa"
+color:"#999"
 }}
 >
 
-ابدأ بإضافة المنتجات المميزة إلى قائمة المفضلة
+أضف المنتجات إلى المفضلة لتظهر هنا.
 
 </p>
 
+</div>
+
+)
+
+:
+
+<div
+style={{
+display:"grid",
+gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",
+gap:"20px"
+}}
+>
+
+{
+
+favorites.map(product=>(
+
+<div
+key={product.id}
+onClick={()=>navigate(`/product/${product.id}`)}
+style={{
+cursor:"pointer"
+}}
+>
+
+<ProductCard
+
+title={product.title}
+
+price={product.price}
+
+image={product.image}
+
+category={product.category}
+
+/>
 
 </div>
 
+))
+
+}
+
+</div>
+
+}
 
 </div>
 
