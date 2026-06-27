@@ -1,66 +1,72 @@
 import {
 collection,
 addDoc,
-getDocs,
 query,
-where,
-orderBy
+orderBy,
+onSnapshot,
+serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
-
-// إرسال رسالة
 export const sendMessage = async(
-conversationId:string,
-senderId:string,
+
+chatId:string,
+
+sender:string,
+
 text:string
+
 )=>{
 
 await addDoc(
-collection(db,"messages"),
+
+collection(db,"chats",chatId,"messages"),
+
 {
-conversationId,
-senderId,
+
+sender,
+
 text,
-createdAt:new Date()
+
+createdAt:serverTimestamp()
+
 }
+
 );
 
 };
 
+export const subscribeMessages=(
 
+chatId:string,
 
-// جلب الرسائل
-export const getMessages = async(
-conversationId:string
+callback:any
+
 )=>{
 
-
 const q=query(
-collection(db,"messages"),
-where(
-"conversationId",
-"==",
-conversationId
-),
-orderBy(
-"createdAt",
-"asc"
-)
+
+collection(db,"chats",chatId,"messages"),
+
+orderBy("createdAt","asc")
+
 );
 
+return onSnapshot(q,(snapshot)=>{
 
-const snapshot=await getDocs(q);
+callback(
 
+snapshot.docs.map(doc=>({
 
+id:doc.id,
 
-return snapshot.docs.map(
-item=>({
-id:item.id,
-...item.data()
-})
+...doc.data()
+
+}))
+
 );
 
+});
 
 };
