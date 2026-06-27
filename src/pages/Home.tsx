@@ -1,25 +1,63 @@
+import Layout from "../components/Layout";
+
 export default function Home(){
+
+const sections=[
+
+"فساتين السهرة",
+
+"فساتين الأعراس",
+
+"العبايات",
+
+"الشناط",
+
+"الأحذية",
+
+"الأسر المنتجة",
+
+"الإعلانات",
+
+"حراج أناقة CHIC"
+
+];
 
 return(
 
+<Layout title="الرئيسية">
+
 <div
 style={{
-height:"100%",
-display:"flex",
-justifyContent:"center",
-alignItems:"center",
-background:"#050505",
-border:"1px solid #d4af37",
-borderRadius:"20px",
-color:"white",
-fontSize:"30px",
-fontWeight:"bold"
+display:"grid",
+gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",
+gap:"20px"
 }}
 >
 
-🏆 الصفحة الرئيسية الملكية
+{sections.map((item)=>(
+
+<div
+key={item}
+style={{
+background:"#111",
+border:"1px solid #D4AF37",
+padding:"30px",
+borderRadius:"18px",
+textAlign:"center",
+fontWeight:"bold",
+cursor:"pointer"
+}}
+>
+
+{item}
 
 </div>
+
+))}
+
+</div>
+
+</Layout>
 
 );
 
