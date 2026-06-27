@@ -6,7 +6,9 @@ Route,
 Navigate
 } from "react-router-dom";
 
+
 import MainLayout from "./layouts/MainLayout";
+
 
 import Home from "./pages/Home";
 import Haraj from "./pages/Haraj";
@@ -15,10 +17,15 @@ import Favorites from "./pages/Favorites";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
-export default function App() {
 
-return (
+
+export default function App(){
+
+
+return(
 
 <BrowserRouter>
 
@@ -27,48 +34,83 @@ return (
 
 <Route
 path="/"
-element={<Navigate to="/home" />}
+element={
+<Navigate to="/login"/>
+}
 />
 
 
+
 <Route
-element={<MainLayout />}
+path="/login"
+element={
+<Login/>
+}
+/>
+
+
+
+<Route
+path="/register"
+element={
+<Register/>
+}
+/>
+
+
+
+<Route
+element={
+<MainLayout/>
+}
 >
 
 
 <Route
 path="/home"
-element={<Home />}
+element={
+<Home/>
+}
 />
 
 
 <Route
 path="/haraj"
-element={<Haraj />}
+element={
+<Haraj/>
+}
 />
 
 
 <Route
 path="/catalog"
-element={<Catalog />}
+element={
+<Catalog/>
+}
 />
 
 
 <Route
 path="/favorites"
-element={<Favorites />}
+element={
+<Favorites/>
+}
 />
 
 
 <Route
 path="/notifications"
-element={<Notifications />}
+element={
+<Notifications/>
+}
 />
 
 
 <Route
 path="/profile"
-element={<Profile />}
+element={
+<Profile/>
+}
 />
 
 
