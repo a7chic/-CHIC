@@ -1,66 +1,86 @@
 import React, { useState } from "react";
-import { loginUser } from "../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 
+import { loginUser } from "../services/authService";
 
 export default function Login(){
 
-const [email,setEmail] = useState("");
-const [password,setPassword] = useState("");
+const navigate=useNavigate();
 
-const navigate = useNavigate();
+const [email,setEmail]=useState("");
+const [password,setPassword]=useState("");
+const [loading,setLoading]=useState(false);
 
+const handleLogin=async()=>{
 
-const handleLogin = async()=>{
+if(!email||!password){
+
+alert("يرجى إدخال البريد الإلكتروني وكلمة المرور");
+
+return;
+
+}
 
 try{
 
+setLoading(true);
+
 await loginUser(
-email,
+email.trim(),
 password
 );
 
 navigate("/home");
 
-}catch(error){
+}catch{
 
-alert("بيانات الدخول غير صحيحة");
+alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+
+}finally{
+
+setLoading(false);
 
 }
 
 };
-
-
 
 return(
 
 <div
 style={{
 minHeight:"100vh",
-background:"#050505",
 display:"flex",
 justifyContent:"center",
 alignItems:"center",
-color:"#fff"
+background:"#050505",
+padding:"20px"
 }}
 >
-
 
 <div
 style={{
-width:"380px",
+width:"100%",
+maxWidth:"430px",
 background:"#111",
 border:"1px solid #D4AF37",
-borderRadius:"20px",
+borderRadius:"22px",
 padding:"35px",
-textAlign:"center"
+boxSizing:"border-box"
 }}
 >
 
+<div
+style={{
+textAlign:"center",
+marginBottom:"30px"
+}}
+>
 
 <h1
 style={{
-color:"#D4AF37"
+margin:0,
+color:"#D4AF37",
+fontSize:"34px"
 }}
 >
 
@@ -68,79 +88,102 @@ color:"#D4AF37"
 
 </h1>
 
+<p
+style={{
+color:"#aaa",
+marginTop:"10px"
+}}
+>
 
-<h2>
+تسجيل الدخول إلى حسابك
 
-تسجيل الدخول
+</p>
 
-</h2>
-
-
+</div>
 
 <input
+
+type="email"
+
 placeholder="البريد الإلكتروني"
+
 value={email}
+
 onChange={(e)=>setEmail(e.target.value)}
+
 style={{
 width:"100%",
-padding:"14px",
-margin:"10px 0",
-borderRadius:"10px",
-border:"none"
+padding:"15px",
+marginBottom:"15px",
+borderRadius:"12px",
+border:"1px solid #333",
+background:"#1a1a1a",
+color:"#fff",
+boxSizing:"border-box"
 }}
+
 />
-
-
 
 <input
+
 type="password"
+
 placeholder="كلمة المرور"
+
 value={password}
+
 onChange={(e)=>setPassword(e.target.value)}
+
 style={{
 width:"100%",
-padding:"14px",
-margin:"10px 0",
-borderRadius:"10px",
-border:"none"
+padding:"15px",
+marginBottom:"20px",
+borderRadius:"12px",
+border:"1px solid #333",
+background:"#1a1a1a",
+color:"#fff",
+boxSizing:"border-box"
 }}
+
 />
-
-
 
 <button
+
 onClick={handleLogin}
+
+disabled={loading}
+
 style={{
 width:"100%",
-padding:"14px",
-marginTop:"15px",
-background:"#D4AF37",
+padding:"15px",
 border:"none",
-borderRadius:"10px",
+borderRadius:"12px",
+background:"#D4AF37",
+color:"#000",
 fontWeight:"bold",
+fontSize:"16px",
 cursor:"pointer"
 }}
 >
 
-دخول
+{loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
 
 </button>
 
-
-
-<p
+<div
 style={{
-marginTop:"20px"
+display:"flex",
+justifyContent:"space-between",
+marginTop:"20px",
+fontSize:"15px"
 }}
 >
-
-ليس لديك حساب؟
 
 <Link
 to="/register"
 style={{
 color:"#D4AF37",
-marginRight:"8px"
+textDecoration:"none"
 }}
 >
 
@@ -148,12 +191,21 @@ marginRight:"8px"
 
 </Link>
 
+<Link
+to="/"
+style={{
+color:"#999",
+textDecoration:"none"
+}}
+>
 
-</p>
+العودة
 
+</Link>
 
 </div>
 
+</div>
 
 </div>
 
