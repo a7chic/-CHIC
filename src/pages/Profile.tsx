@@ -1,15 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import { getProducts } from "../services/productService";
 
-export default function Profile() {
+export default function Profile(){
 
-return (
+const navigate=useNavigate();
+
+const {user}=useAuth();
+
+const [myProducts,setMyProducts]=useState<any[]>([]);
+
+useEffect(()=>{
+
+const load=async()=>{
+
+const data:any[]=await getProducts();
+
+setMyProducts(
+
+data.filter(
+
+item=>item.ownerId===user?.uid
+
+)
+
+);
+
+};
+
+if(user){
+
+load();
+
+}
+
+},[user]);
+
+return(
 
 <div
 style={{
 color:"#fff"
 }}
 >
-
 
 <div
 style={{
@@ -21,48 +55,26 @@ marginBottom:"25px"
 }}
 >
 
-
-<h1
+<div
 style={{
-color:"#D4AF37"
+display:"flex",
+alignItems:"center",
+gap:"20px",
+flexWrap:"wrap"
 }}
 >
-
-👤 حسابي
-
-</h1>
-
-
-<p
-style={{
-color:"#ccc",
-fontSize:"18px"
-}}
->
-
-إدارة بيانات الحساب والإعدادات الشخصية
-
-</p>
-
-
-</div>
-
-
 
 <div
 style={{
-background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"18px",
-padding:"30px"
-}}
->
-
-
-<div
-style={{
-fontSize:"70px",
-textAlign:"center"
+width:"90px",
+height:"90px",
+borderRadius:"50%",
+background:"#D4AF37",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+fontSize:"45px",
+color:"#000"
 }}
 >
 
@@ -70,90 +82,193 @@ textAlign:"center"
 
 </div>
 
+<div>
 
-<h2
+<h1
 style={{
 color:"#D4AF37",
+margin:0
+}}
+>
+
+{user?.displayName || "مستخدم أناقة CHIC"}
+
+</h1>
+
+<p
+style={{
+color:"#aaa"
+}}
+>
+
+{user?.email || "لا يوجد بريد إلكتروني"}
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div
+style={{
+display:"grid",
+gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
+gap:"20px",
+marginBottom:"30px"
+}}
+>
+
+{[
+["📦","إعلاناتي",myProducts.length],
+["❤️","المفضلة","0"],
+["👁️","إجمالي المشاهدات","0"],
+["⭐","التقييم","5.0"]
+].map(item=>(
+
+<div
+key={item[1]}
+style={{
+background:"#111",
+border:"1px solid #D4AF37",
+borderRadius:"18px",
+padding:"25px",
 textAlign:"center"
 }}
 >
 
-مستخدم أناقة CHIC
+<div
+style={{
+fontSize:"38px"
+}}
+>
+
+{item[0]}
+
+</div>
+
+<h3
+style={{
+color:"#D4AF37"
+}}
+>
+
+{item[1]}
+
+</h3>
+
+<h2>
+
+{item[2]}
 
 </h2>
 
+</div>
+
+))}
+
+</div>
 
 <div
 style={{
-marginTop:"25px"
+background:"#111",
+border:"1px solid #D4AF37",
+borderRadius:"20px",
+padding:"25px"
 }}
 >
 
+<h2
+style={{
+color:"#D4AF37"
+}}
+>
+
+📦 إعلاناتي
+
+</h2>
+
+{
+
+myProducts.length===0?
+
+(
+
+<p
+style={{
+color:"#aaa"
+}}
+>
+
+لا يوجد لديك إعلانات حتى الآن.
+
+</p>
+
+)
+
+:
+
+myProducts.map(product=>(
 
 <div
+key={product.id}
 style={{
-background:"#1d1d1d",
-padding:"15px",
+background:"#1b1b1b",
+padding:"18px",
 borderRadius:"12px",
-marginBottom:"12px"
+marginBottom:"15px",
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+flexWrap:"wrap"
 }}
 >
 
-📧 البريد الإلكتروني: غير مسجل
+<div>
 
-</div>
-
-
-<div
+<h3
 style={{
-background:"#1d1d1d",
-padding:"15px",
-borderRadius:"12px",
-marginBottom:"12px"
+margin:0,
+color:"#D4AF37"
 }}
 >
 
-📱 رقم الجوال: غير مسجل
+{product.title}
+
+</h3>
+
+<p>
+
+💰 {product.price} ريال
+
+</p>
 
 </div>
-
-
-<div
-style={{
-background:"#1d1d1d",
-padding:"15px",
-borderRadius:"12px"
-}}
->
-
-⭐ العضوية: عادية
-
-</div>
-
-
-</div>
-
 
 <button
+onClick={()=>navigate(`/product/${product.id}`)}
 style={{
-marginTop:"25px",
 background:"#D4AF37",
-color:"#000",
 border:"none",
-padding:"14px 30px",
-borderRadius:"12px",
+padding:"10px 18px",
+borderRadius:"10px",
 fontWeight:"bold",
 cursor:"pointer"
 }}
 >
 
-تعديل الحساب
+عرض
 
 </button>
 
-
 </div>
 
+))
+
+}
+
+</div>
 
 </div>
 
