@@ -1,31 +1,34 @@
 import {
 collection,
 addDoc,
+getDocs,
 query,
+where,
 orderBy,
-onSnapshot,
 serverTimestamp
 } from "firebase/firestore";
 
-import { db } from "../firebase/config";
+import {db} from "../firebase/config";
 
-export const sendMessage = async(
+export async function sendMessage(
 
 chatId:string,
 
-sender:string,
+senderId:string,
 
 text:string
 
-)=>{
+){
 
 await addDoc(
 
-collection(db,"chats",chatId,"messages"),
+collection(db,"messages"),
 
 {
 
-sender,
+chatId,
+
+senderId,
 
 text,
 
@@ -35,38 +38,32 @@ createdAt:serverTimestamp()
 
 );
 
-};
+}
 
-export const subscribeMessages=(
+export async function getMessages(
 
-chatId:string,
+chatId:string
 
-callback:any
-
-)=>{
+){
 
 const q=query(
 
-collection(db,"chats",chatId,"messages"),
+collection(db,"messages"),
+
+where("chatId","==",chatId),
 
 orderBy("createdAt","asc")
 
 );
 
-return onSnapshot(q,(snapshot)=>{
+const snapshot=await getDocs(q);
 
-callback(
-
-snapshot.docs.map(doc=>({
+return snapshot.docs.map(doc=>({
 
 id:doc.id,
 
 ...doc.data()
 
-}))
+}));
 
-);
-
-});
-
-};
+}
