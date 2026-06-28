@@ -1,138 +1,118 @@
-import React, { useState, useEffect } from "react";
-import { getProducts } from "../services/productService";
-import ProductCard from "../components/ProductCard";
+import React,{useMemo,useState,useEffect} from "react";
+import {useNavigate} from "react-router-dom";
 import SearchBar from "../components/SearchBar";
-
+import ProductCard from "../components/ProductCard";
+import {getProducts} from "../services/productService";
 
 export default function Search(){
 
-
-const [products,setProducts]=useState<any[]>([]);
-
-const [filtered,setFiltered]=useState<any[]>([]);
+const navigate=useNavigate();
 
 const [search,setSearch]=useState("");
 
-
+const [products,setProducts]=useState<any[]>([]);
 
 useEffect(()=>{
 
-
 const load=async()=>{
 
-
-const data:any[]=await getProducts();
-
-
-setProducts(data);
-
-setFiltered(data);
-
+setProducts(await getProducts());
 
 };
-
 
 load();
 
-
 },[]);
 
+const result=useMemo(()=>{
 
+return products.filter(item=>
 
-const handleSearch=(value:string)=>{
+item.title?.toLowerCase().includes(search.toLowerCase())
 
+||
 
-setSearch(value);
+item.description?.toLowerCase().includes(search.toLowerCase())
 
+||
 
+item.category?.toLowerCase().includes(search.toLowerCase())
 
-const result=products.filter(
-(item)=>
+||
 
-item.title
-?.toLowerCase()
-.includes(
-value.toLowerCase()
-)
+item.city?.toLowerCase().includes(search.toLowerCase())
 
 );
 
-
-
-setFiltered(result);
-
-
-};
-
-
+},[products,search]);
 
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
+<div style={{color:"#fff"}}>
 
+<h1 style={{color:"#D4AF37"}}>
 
-<h1
-style={{
-color:"#D4AF37"
-}}
->
-
-🔎 البحث في أناقة CHIC
+🔍 البحث
 
 </h1>
-
-
 
 <SearchBar
 
 value={search}
 
-onChange={handleSearch}
+onChange={setSearch}
 
 />
 
-
-
-<div
+<p
 style={{
-display:"grid",
-gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",
-gap:"20px",
-marginTop:"25px"
+marginTop:"20px",
+color:"#888"
 }}
 >
 
+عدد النتائج: {result.length}
 
-{filtered.map(
-(product)=>(
+</p>
 
+<div
+style={{
+marginTop:"20px",
+display:"grid",
+gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",
+gap:"20px"
+}}
+>
+
+{
+
+result.map(item=>
+
+<div
+key={item.id}
+onClick={()=>navigate(`/product/${item.id}`)}
+style={{cursor:"pointer"}}
+>
 
 <ProductCard
 
-key={product.id}
+title={item.title}
 
-title={product.title}
+price={item.price}
 
-price={product.price}
+image={item.image}
 
-image={product.image}
-
-category={product.category}
+category={item.category}
 
 />
 
+</div>
 
 )
 
-)}
-
+}
 
 </div>
-
 
 </div>
 
