@@ -1,63 +1,83 @@
-export type UserRole =
-  | "owner"
-  | "admin"
-  | "moderator"
-  | "visitor";
+export interface User{
 
-export interface UserData {
-  uid: string;
+id:string;
 
-  name: string;
+name:string;
 
-  email: string;
+email:string;
 
-  role: UserRole;
+phone?:string;
 
-  active: boolean;
+image?:string;
 
-  createdAt: number;
+role:string;
 
-  lastLogin: number;
+createdAt?:any;
 
-  photo: string;
-
-  phone: string;
 }
 
-export interface NotificationData {
-  id: string;
+export interface Product{
 
-  title: string;
+id:string;
 
-  message: string;
+title:string;
 
-  color: string;
+description:string;
 
-  createdAt: number;
+price:number|string;
 
-  read: boolean;
+category:string;
+
+brand?:string;
+
+city?:string;
+
+condition?:string;
+
+image:string;
+
+ownerId:string;
+
+featured?:boolean;
+
+verified?:boolean;
+
+views?:number;
+
+likes?:number;
+
+status?:string;
+
+createdAt?:any;
+
 }
 
-export interface CatalogItem {
+export interface Message{
 
-  id:string;
+id:string;
 
-  title:string;
+chatId:string;
 
-  description:string;
+senderId:string;
 
-  price:number;
+text:string;
 
-  image:string;
+createdAt?:any;
 
-  category:string;
+}
 
-  subCategory:string;
+export interface Notification{
 
-  status:string;
+id:string;
 
-  city:string;
+userId:string;
 
-  seller:string;
+title:string;
+
+message:string;
+
+read:boolean;
+
+createdAt?:any;
 
 }
