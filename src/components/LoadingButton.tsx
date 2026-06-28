@@ -1,39 +1,41 @@
 import React from "react";
 
-
 interface Props{
-
 loading:boolean;
-
 text:string;
-
+loadingText?:string;
+onClick?:()=>void;
+type?:"button"|"submit";
 }
-
-
 
 export default function LoadingButton({
 loading,
-text
+text,
+loadingText="جاري التنفيذ...",
+onClick,
+type="button"
 }:Props){
-
 
 return(
 
 <button
+type={type}
+onClick={onClick}
 disabled={loading}
 style={{
-background:"#D4AF37",
+width:"100%",
+padding:"14px",
+background:loading?"#777":"#D4AF37",
 color:"#000",
 border:"none",
-padding:"14px 25px",
-borderRadius:"12px",
+borderRadius:"10px",
 fontWeight:"bold",
-cursor:"pointer",
-opacity:loading?0.6:1
+cursor:loading?"not-allowed":"pointer",
+fontSize:"16px"
 }}
 >
 
-{loading ? "جاري التنفيذ..." : text}
+{loading?"⏳ "+loadingText:text}
 
 </button>
 
