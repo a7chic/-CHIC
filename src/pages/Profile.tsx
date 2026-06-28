@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { getProducts } from "../services/productService";
@@ -15,16 +15,12 @@ useEffect(()=>{
 
 const load=async()=>{
 
-const data:any[]=await getProducts();
+const products:any[]=await getProducts();
 
 setMyProducts(
-
-data.filter(
-
+products.filter(
 item=>item.ownerId===user?.uid
-
 )
-
 );
 
 };
@@ -37,13 +33,24 @@ load();
 
 },[user]);
 
+const totalViews=useMemo(
+()=>myProducts.reduce((sum,item)=>sum+(item.views||0),0),
+[myProducts]
+);
+
+const totalLikes=useMemo(
+()=>myProducts.reduce((sum,item)=>sum+(item.likes||0),0),
+[myProducts]
+);
+
+const featuredCount=useMemo(
+()=>myProducts.filter(item=>item.featured).length,
+[myProducts]
+);
+
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
+<div style={{color:"#fff"}}>
 
 <div
 style={{
@@ -59,8 +66,17 @@ marginBottom:"25px"
 style={{
 display:"flex",
 alignItems:"center",
+justifyContent:"space-between",
 gap:"20px",
 flexWrap:"wrap"
+}}
+>
+
+<div
+style={{
+display:"flex",
+alignItems:"center",
+gap:"20px"
 }}
 >
 
@@ -73,7 +89,7 @@ background:"#D4AF37",
 display:"flex",
 justifyContent:"center",
 alignItems:"center",
-fontSize:"45px",
+fontSize:"42px",
 color:"#000"
 }}
 >
@@ -84,28 +100,42 @@ color:"#000"
 
 <div>
 
-<h1
+<h2
 style={{
-color:"#D4AF37",
-margin:0
+margin:0,
+color:"#D4AF37"
 }}
 >
 
-{user?.displayName || "مستخدم أناقة CHIC"}
+{user?.displayName || "مستخدم ANAQA CHIC"}
 
-</h1>
+</h2>
 
-<p
-style={{
-color:"#aaa"
-}}
->
+<p style={{color:"#aaa"}}>
 
-{user?.email || "لا يوجد بريد إلكتروني"}
+{user?.email}
 
 </p>
 
 </div>
+
+</div>
+
+<button
+onClick={()=>navigate("/add-product")}
+style={{
+background:"#D4AF37",
+border:"none",
+padding:"12px 18px",
+borderRadius:"10px",
+fontWeight:"bold",
+cursor:"pointer"
+}}
+>
+
+➕ إعلان جديد
+
+</button>
 
 </div>
 
@@ -114,53 +144,45 @@ color:"#aaa"
 <div
 style={{
 display:"grid",
-gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
-gap:"20px",
+gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",
+gap:"18px",
 marginBottom:"30px"
 }}
 >
 
 {[
 ["📦","إعلاناتي",myProducts.length],
-["❤️","المفضلة","0"],
-["👁️","إجمالي المشاهدات","0"],
-["⭐","التقييم","5.0"]
-].map(item=>(
+["👁️","المشاهدات",totalViews],
+["❤️","الإعجابات",totalLikes],
+["⭐","الإعلانات المميزة",featuredCount]
+].map(card=>(
 
 <div
-key={item[1]}
+key={String(card[1])}
 style={{
 background:"#111",
 border:"1px solid #D4AF37",
 borderRadius:"18px",
-padding:"25px",
+padding:"22px",
 textAlign:"center"
 }}
 >
 
-<div
-style={{
-fontSize:"38px"
-}}
->
+<div style={{fontSize:"36px"}}>
 
-{item[0]}
+{card[0]}
 
 </div>
 
-<h3
-style={{
-color:"#D4AF37"
-}}
->
+<h3 style={{color:"#D4AF37"}}>
 
-{item[1]}
+{card[1]}
 
 </h3>
 
 <h2>
 
-{item[2]}
+{card[2]}
 
 </h2>
 
@@ -179,11 +201,7 @@ padding:"25px"
 }}
 >
 
-<h2
-style={{
-color:"#D4AF37"
-}}
->
+<h2 style={{color:"#D4AF37"}}>
 
 📦 إعلاناتي
 
@@ -191,21 +209,15 @@ color:"#D4AF37"
 
 {
 
-myProducts.length===0?
+myProducts.length===0
 
-(
+?
 
-<p
-style={{
-color:"#aaa"
-}}
->
+<p style={{color:"#888"}}>
 
-لا يوجد لديك إعلانات حتى الآن.
+لم تقم بإضافة أي إعلان حتى الآن.
 
 </p>
-
-)
 
 :
 
@@ -215,13 +227,14 @@ myProducts.map(product=>(
 key={product.id}
 style={{
 background:"#1b1b1b",
+borderRadius:"14px",
 padding:"18px",
-borderRadius:"12px",
 marginBottom:"15px",
 display:"flex",
 justifyContent:"space-between",
 alignItems:"center",
-flexWrap:"wrap"
+flexWrap:"wrap",
+gap:"15px"
 }}
 >
 
@@ -229,7 +242,7 @@ flexWrap:"wrap"
 
 <h3
 style={{
-margin:0,
+margin:"0 0 10px",
 color:"#D4AF37"
 }}
 >
@@ -238,11 +251,11 @@ color:"#D4AF37"
 
 </h3>
 
-<p>
+<div>💰 {product.price} ريال</div>
 
-💰 {product.price} ريال
+<div>👁️ {product.views||0}</div>
 
-</p>
+<div>❤️ {product.likes||0}</div>
 
 </div>
 
@@ -258,7 +271,7 @@ cursor:"pointer"
 }}
 >
 
-عرض
+فتح الإعلان
 
 </button>
 
