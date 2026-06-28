@@ -1,49 +1,48 @@
 import {
-  collection,
-  getDocs,
-  query,
-  where
+collection,
+getDocs,
+query,
+where
 } from "firebase/firestore";
 
-import { db } from "../firebase/config";
+import {db} from "../firebase/config";
 
+export async function getAllUsers(){
 
-// جلب المستخدمين
-export const getAllUsers = async () => {
+const snapshot=await getDocs(
 
-  const snapshot = await getDocs(
-    collection(db,"users")
-  );
+collection(db,"users")
 
+);
 
-  return snapshot.docs.map(
-    item=>({
-      id:item.id,
-      ...item.data()
-    })
-  );
+return snapshot.docs.map(doc=>({
 
-};
+id:doc.id,
 
+...doc.data()
 
+}));
 
-// جلب المشرفين
-export const getAdmins = async () => {
+}
 
-  const q = query(
-    collection(db,"users"),
-    where("role","==","admin")
-  );
+export async function getAdmins(){
 
+const q=query(
 
-  const snapshot = await getDocs(q);
+collection(db,"users"),
 
+where("role","==","admin")
 
-  return snapshot.docs.map(
-    item=>({
-      id:item.id,
-      ...item.data()
-    })
-  );
+);
 
-};
+const snapshot=await getDocs(q);
+
+return snapshot.docs.map(doc=>({
+
+id:doc.id,
+
+...doc.data()
+
+}));
+
+}
