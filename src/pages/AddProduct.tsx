@@ -33,9 +33,9 @@ return;
 }
 
 if(
-!title ||
-!price ||
-!category
+!title.trim() ||
+!price.trim() ||
+!category.trim()
 ){
 
 alert("يرجى تعبئة الحقول المطلوبة");
@@ -46,9 +46,9 @@ return;
 
 await addProduct({
 
-title,
+title:title.trim(),
 
-description,
+description:description.trim(),
 
 price,
 
@@ -62,7 +62,21 @@ condition,
 
 image,
 
-ownerId:user.uid
+ownerId:user.uid,
+
+status:"available",
+
+likes:0,
+
+views:0,
+
+favorites:0,
+
+featured:false,
+
+verified:false,
+
+createdAt:new Date()
 
 });
 
@@ -142,6 +156,7 @@ onChange={setCondition}
 style={{
 display:"block",
 marginBottom:"10px",
+marginTop:"20px",
 color:"#D4AF37",
 fontWeight:"bold"
 }}
@@ -163,7 +178,8 @@ background:"#111",
 color:"#fff",
 border:"1px solid #333",
 borderRadius:"10px",
-resize:"vertical"
+resize:"vertical",
+boxSizing:"border-box"
 }}
 />
 
@@ -200,5 +216,4 @@ onClick={saveProduct}
 </div>
 
 );
-
 }
