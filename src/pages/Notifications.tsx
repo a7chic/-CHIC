@@ -29,11 +29,7 @@ setNotifications([]);
 
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
+<div style={{color:"#fff"}}>
 
 <div
 style={{
@@ -65,52 +61,27 @@ color:"#999"
 }}
 >
 
-عدد الإشعارات: {notifications.length}
+آخر التنبيهات الخاصة بحسابك
 
 </p>
 
 </div>
 
-<div
-style={{
-display:"flex",
-gap:"10px"
-}}
->
-
 <button
-onClick={()=>navigate("/haraj")}
+onClick={clearNotifications}
 style={{
 background:"#D4AF37",
 border:"none",
 padding:"12px 18px",
 borderRadius:"10px",
-fontWeight:"bold",
-cursor:"pointer"
+cursor:"pointer",
+fontWeight:"bold"
 }}
 >
 
-🛒 الحراج
+حذف الكل
 
 </button>
-
-<button
-onClick={clearNotifications}
-style={{
-background:"#333",
-color:"#fff",
-border:"1px solid #555",
-padding:"12px 18px",
-borderRadius:"10px",
-cursor:"pointer"
-}}
->
-
-🗑️ مسح الكل
-
-</button>
-
-</div>
 
 </div>
 
@@ -118,25 +89,19 @@ cursor:"pointer"
 
 notifications.length===0?
 
-(
-
 <div
 style={{
 background:"#111",
 border:"1px solid #D4AF37",
-borderRadius:"20px",
-padding:"60px",
+padding:"45px",
+borderRadius:"18px",
 textAlign:"center"
 }}
 >
 
-<div
-style={{
-fontSize:"65px"
-}}
->
+<div style={{fontSize:"60px"}}>
 
-🔔
+🔕
 
 </div>
 
@@ -146,23 +111,11 @@ color:"#D4AF37"
 }}
 >
 
-لا توجد إشعارات جديدة
+لا توجد إشعارات
 
 </h2>
 
-<p
-style={{
-color:"#999"
-}}
->
-
-ستظهر هنا إشعارات الرسائل والإعجابات والإعلانات الجديدة.
-
-</p>
-
 </div>
-
-)
 
 :
 
@@ -172,11 +125,13 @@ notifications.map((item,index)=>(
 key={index}
 style={{
 background:"#111",
-border:"1px solid #D4AF37",
+border:"1px solid #333",
+padding:"20px",
 borderRadius:"15px",
-padding:"18px",
-marginBottom:"15px"
+marginBottom:"15px",
+cursor:"pointer"
 }}
+onClick={()=>navigate(item.link||"/home")}
 >
 
 <h3
