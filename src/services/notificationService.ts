@@ -1,35 +1,26 @@
 import {
 collection,
 addDoc,
+getDocs,
 query,
 where,
-getDocs,
+orderBy,
 serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
-export const sendNotification=async(
+const notificationsRef=collection(db,"notifications");
 
-uid:string,
-
-title:string,
-
-message:string
-
-)=>{
+export async function sendNotification(data:any){
 
 await addDoc(
 
-collection(db,"notifications"),
+notificationsRef,
 
 {
 
-uid,
-
-title,
-
-message,
+...data,
 
 read:false,
 
@@ -39,19 +30,17 @@ createdAt:serverTimestamp()
 
 );
 
-};
+}
 
-export const getNotifications=async(
-
-uid:string
-
-)=>{
+export async function getNotifications(userId:string){
 
 const q=query(
 
-collection(db,"notifications"),
+notificationsRef,
 
-where("uid","==",uid)
+where("userId","==",userId),
+
+orderBy("createdAt","desc")
 
 );
 
@@ -65,4 +54,4 @@ id:doc.id,
 
 }));
 
-};
+}
