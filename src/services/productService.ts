@@ -2,42 +2,47 @@ import {
 collection,
 addDoc,
 getDocs,
-deleteDoc,
+getDoc,
 doc,
 updateDoc,
+deleteDoc,
 query,
 orderBy,
-increment,
-where
+serverTimestamp,
+increment
 } from "firebase/firestore";
 
-import {db} from "../firebase/config";
+import { db } from "../firebase/config";
 
-export const addProduct=async(data:any)=>{
+const productsRef=collection(db,"products");
 
-await addDoc(
+export async function addProduct(product:any){
 
-collection(db,"products"),
+return await addDoc(productsRef,{
 
-{
-...data,
-likes:0,
+...product,
+
+createdAt:serverTimestamp(),
+
+updatedAt:serverTimestamp(),
+
 views:0,
-sold:false,
-featured:false,
-verified:false,
-createdAt:new Date()
+
+likes:0,
+
+favorites:0,
+
+status:"available"
+
+});
+
 }
 
-);
-
-};
-
-export const getProducts=async()=>{
+export async function getProducts(){
 
 const q=query(
 
-collection(db,"products"),
+productsRef,
 
 orderBy("createdAt","desc")
 
@@ -53,65 +58,47 @@ id:doc.id,
 
 }));
 
-};
+}
 
-export const getFeaturedProducts=async()=>{
+export async function getProduct(id:string){
 
-const q=query(
+const snapshot=await getDoc(
 
-collection(db,"products"),
-
-where("featured","==",true)
+doc(db,"products",id)
 
 );
 
-const snapshot=await getDocs(q);
+if(!snapshot.exists()) return null;
 
-return snapshot.docs.map(doc=>({
+return{
 
-id:doc.id,
+id:snapshot.id,
 
-...doc.data()
-
-}));
+...snapshot.data()
 
 };
 
-export const getVerifiedProducts=async()=>{
+}
 
-const q=query(
-
-collection(db,"products"),
-
-where("verified","==",true)
-
-);
-
-const snapshot=await getDocs(q);
-
-return snapshot.docs.map(doc=>({
-
-id:doc.id,
-
-...doc.data()
-
-}));
-
-};
-
-export const updateProduct=async(id:string,data:any)=>{
+export async function updateProduct(id:string,data:any){
 
 await updateDoc(
 
 doc(db,"products",id),
 
-data
+{
+
+...data,
+
+updatedAt:serverTimestamp()
+
+}
 
 );
 
-};
+}
 
-export const deleteProduct=async(id:string)=>{
+export async function deleteProduct(id:string){
 
 await deleteDoc(
 
@@ -119,9 +106,9 @@ doc(db,"products",id)
 
 );
 
-};
+}
 
-export const increaseViews=async(id:string)=>{
+export async function increaseViews(id:string){
 
 await updateDoc(
 
@@ -135,9 +122,9 @@ views:increment(1)
 
 );
 
-};
+}
 
-export const increaseLikes=async(id:string)=>{
+export async function increaseLikes(id:string){
 
 await updateDoc(
 
@@ -151,9 +138,9 @@ likes:increment(1)
 
 );
 
-};
+}
 
-export const markAsSold=async(id:string)=>{
+export async function toggleFeatured(id:string,featured:boolean){
 
 await updateDoc(
 
@@ -161,31 +148,15 @@ doc(db,"products",id),
 
 {
 
-sold:true
+featured
 
 }
 
 );
 
-};
-
-export const featureProduct=async(id:string)=>{
-
-await updateDoc(
-
-doc(db,"products",id),
-
-{
-
-featured:true
-
 }
 
-);
-
-};
-
-export const verifyProduct=async(id:string)=>{
+export async function verifyProduct(id:string){
 
 await updateDoc(
 
@@ -199,4 +170,20 @@ verified:true
 
 );
 
-};
+}
+
+export async function markAsSold(id:string){
+
+await updateDoc(
+
+doc(db,"products",id),
+
+{
+
+status:"sold"
+
+}
+
+);
+
+}
