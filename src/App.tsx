@@ -14,10 +14,8 @@ import Catalog from "./pages/Catalog";
 import Favorites from "./pages/Favorites";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
 import Search from "./pages/Search";
 import Categories from "./pages/Categories";
 import ProductDetails from "./pages/ProductDetails";
@@ -38,7 +36,7 @@ return(
 
 <Route
 path="/"
-element={<Navigate to="/login"/>}
+element={<Navigate to="/home" replace/>}
 />
 
 <Route
@@ -60,25 +58,15 @@ element={
 >
 
 <Route path="/home" element={<Home/>}/>
-
 <Route path="/haraj" element={<Haraj/>}/>
-
 <Route path="/catalog" element={<Catalog/>}/>
-
 <Route path="/favorites" element={<Favorites/>}/>
-
 <Route path="/notifications" element={<Notifications/>}/>
-
 <Route path="/profile" element={<Profile/>}/>
-
 <Route path="/search" element={<Search/>}/>
-
 <Route path="/categories" element={<Categories/>}/>
-
 <Route path="/product/:id" element={<ProductDetails/>}/>
-
 <Route path="/add-product" element={<AddProduct/>}/>
-
 <Route path="/chat/:id" element={<Chat/>}/>
 
 <Route
@@ -91,6 +79,11 @@ element={
 />
 
 </Route>
+
+<Route
+path="*"
+element={<Navigate to="/home" replace/>}
+/>
 
 </Routes>
 
