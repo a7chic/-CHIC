@@ -1,39 +1,58 @@
 import React from "react";
 
-
 interface Props{
 
 title:string;
 
-icon?:string;
+subtitle?:string;
 
 }
 
-
-
 export default function SectionTitle({
-title,
-icon
-}:Props){
 
+title,
+
+subtitle
+
+}:Props){
 
 return(
 
-<h2
+<div
 style={{
-color:"#D4AF37",
-display:"flex",
-alignItems:"center",
-gap:"10px",
-marginBottom:"20px"
+marginBottom:"25px"
 }}
 >
 
-{icon}
+<h2
+style={{
+margin:0,
+color:"#D4AF37"
+}}
+>
 
 {title}
 
 </h2>
+
+{
+
+subtitle&&
+
+<p
+style={{
+marginTop:"8px",
+color:"#999"
+}}
+>
+
+{subtitle}
+
+</p>
+
+}
+
+</div>
 
 );
 
