@@ -1,35 +1,33 @@
 import React from "react";
 
-
 interface Props{
 
-price:string;
+price:string|number;
 
 }
 
-
-
 export default function PriceTag({
-price
-}:Props){
 
+price
+
+}:Props){
 
 return(
 
-<div
+<span
 style={{
-display:"inline-block",
 background:"#D4AF37",
 color:"#000",
-padding:"8px 18px",
-borderRadius:"20px",
-fontWeight:"bold"
+padding:"6px 12px",
+borderRadius:"8px",
+fontWeight:"bold",
+fontSize:"15px"
 }}
 >
 
-{price} ريال
+💰 {price} ريال
 
-</div>
+</span>
 
 );
 
