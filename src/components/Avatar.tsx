@@ -1,54 +1,47 @@
 import React from "react";
 
-
 interface Props{
-
-image?:string;
-
 name?:string;
-
+image?:string;
+size?:number;
 }
 
-
-
 export default function Avatar({
+name="U",
 image,
-name
+size=60
 }:Props){
 
+if(image){
+
+return(
+
+<img
+
+src={image}
+
+alt={name}
+
+style={{
+width:size,
+height:size,
+borderRadius:"50%",
+objectFit:"cover",
+border:"2px solid #D4AF37"
+}}
+
+/>
+
+);
+
+}
 
 return(
 
 <div
 style={{
-display:"flex",
-alignItems:"center",
-gap:"12px"
-}}
->
-
-
-{image ? (
-
-<img
-src={image}
-alt={name}
-style={{
-width:"55px",
-height:"55px",
-borderRadius:"50%",
-objectFit:"cover",
-border:"2px solid #D4AF37"
-}}
-/>
-
-):(
-
-
-<div
-style={{
-width:"55px",
-height:"55px",
+width:size,
+height:size,
 borderRadius:"50%",
 background:"#D4AF37",
 color:"#000",
@@ -56,29 +49,11 @@ display:"flex",
 justifyContent:"center",
 alignItems:"center",
 fontWeight:"bold",
-fontSize:"22px"
+fontSize:size/2.3
 }}
 >
 
-👤
-
-</div>
-
-)}
-
-
-
-<span
-style={{
-color:"#fff",
-fontWeight:"bold"
-}}
->
-
-{name || "مستخدم"}
-
-</span>
-
+{name.charAt(0).toUpperCase()}
 
 </div>
 
