@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import ProductCard from "../components/ProductCard";
 import SearchBar from "../components/SearchBar";
 import { getProducts } from "../services/productService";
@@ -10,18 +9,13 @@ export default function Catalog(){
 const navigate=useNavigate();
 
 const [products,setProducts]=useState<any[]>([]);
-const [filtered,setFiltered]=useState<any[]>([]);
 const [search,setSearch]=useState("");
 
 useEffect(()=>{
 
 const load=async()=>{
 
-const data:any[]=await getProducts();
-
-setProducts(data);
-
-setFiltered(data);
+setProducts(await getProducts());
 
 };
 
@@ -29,126 +23,62 @@ load();
 
 },[]);
 
-const handleSearch=(value:string)=>{
+const filtered=useMemo(()=>{
 
-setSearch(value);
+return products.filter(item=>
 
-const result=products.filter(item=>
-
-item.title?.toLowerCase().includes(value.toLowerCase())
+item.title?.toLowerCase().includes(search.toLowerCase())
 
 ||
 
-item.category?.toLowerCase().includes(value.toLowerCase())
+item.category?.toLowerCase().includes(search.toLowerCase())
 
 ||
 
-item.brand?.toLowerCase().includes(value.toLowerCase())
+item.brand?.toLowerCase().includes(search.toLowerCase())
 
 );
 
-setFiltered(result);
-
-};
+},[products,search]);
 
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
+<div style={{color:"#fff"}}>
 
-<div
-style={{
-background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"20px",
-padding:"30px",
-marginBottom:"25px"
-}}
->
+<h1 style={{color:"#D4AF37"}}>
 
-<h1
-style={{
-color:"#D4AF37"
-}}
->
-
-👗 كتالوج ANAQA CHIC
+👗 الكتالوج
 
 </h1>
 
-<p
-style={{
-color:"#aaa"
-}}
->
-
-استكشف جميع المنتجات بطريقة احترافية.
-
-</p>
-
-</div>
+<div style={{margin:"20px 0"}}>
 
 <SearchBar
 
 value={search}
 
-onChange={handleSearch}
+onChange={setSearch}
 
 />
+
+</div>
 
 <div
 style={{
 display:"grid",
 gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",
-gap:"20px",
-marginTop:"25px"
+gap:"20px"
 }}
 >
 
 {
 
-filtered.length===0?
-
-(
-
-<div
-style={{
-gridColumn:"1/-1",
-background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"18px",
-padding:"50px",
-textAlign:"center"
-}}
->
-
-<h2
-style={{
-color:"#D4AF37"
-}}
->
-
-لا توجد منتجات
-
-</h2>
-
-</div>
-
-)
-
-:
-
-filtered.map(product=>(
+filtered.map(product=>
 
 <div
 key={product.id}
 onClick={()=>navigate(`/product/${product.id}`)}
-style={{
-cursor:"pointer"
-}}
+style={{cursor:"pointer"}}
 >
 
 <ProductCard
@@ -165,7 +95,7 @@ category={product.category}
 
 </div>
 
-))
+)
 
 }
 
