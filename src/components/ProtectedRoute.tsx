@@ -1,24 +1,18 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { auth } from "../firebase/config";
+
+interface Props{
+children:React.ReactNode;
+}
 
 export default function ProtectedRoute({
 children
-}:{
-children:React.ReactNode;
-}){
+}:Props){
 
-const {user,loading}=useAuth();
+if(!auth.currentUser){
 
-if(loading){
-
-return <div style={{padding:"40px",color:"#D4AF37"}}>جاري التحميل...</div>;
-
-}
-
-if(!user){
-
-return <Navigate to="/login" replace/>;
+return <Navigate to="/login" replace />;
 
 }
 
