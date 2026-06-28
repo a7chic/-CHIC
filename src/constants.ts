@@ -1,19 +1,27 @@
-export const SITE_NAME="أناقة CHIC";
+export const APP_NAME="ANAQA CHIC";
 
-export const OWNER_NAME="فهد بن حمود بن فهد الشمري";
+export const APP_VERSION="2.0.0";
 
-export const OWNER_EMAIL="";
+export const CURRENCY="ريال";
 
-export const OWNER_PHONE="0536667222";
+export const DEFAULT_AVATAR="/avatar.png";
 
-export const OWNER_WHATSAPP="+966507882771";
+export const DEFAULT_PRODUCT_IMAGE="/product.png";
 
-export const SNAP="pmp.u";
+export const MAX_PRODUCT_IMAGES=8;
 
-export const SITE_YEAR=2010;
+export const MAX_DESCRIPTION_LENGTH=1000;
 
-export const COPYRIGHT=2026;
+export const PAGE_SIZE=20;
 
-export const ROYAL_COLOR="#D4AF37";
+export const ADMIN_EMAIL="admin@chic.com";
 
-export const DARK="#050505";
+export const SUPPORT_EMAIL="support@anaqa-chic.com";
+
+export const PRIMARY_COLOR="#D4AF37";
+
+export const DARK_COLOR="#111111";
+
+export const SUCCESS_COLOR="#2E7D32";
+
+export const ERROR_COLOR="#C62828";
