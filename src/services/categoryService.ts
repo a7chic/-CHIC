@@ -1,28 +1,57 @@
 import {
 collection,
-getDocs
+addDoc,
+getDocs,
+query,
+where,
+orderBy,
+serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
+const notificationsRef=collection(db,"notifications");
 
+export async function sendNotification(data:any){
 
-export const getCategories = async()=>{
+await addDoc(
 
+notificationsRef,
 
-const snapshot =
-await getDocs(
-collection(db,"categories")
+{
+
+...data,
+
+read:false,
+
+createdAt:serverTimestamp()
+
+}
+
 );
 
+}
 
+export async function getNotifications(userId:string){
 
-return snapshot.docs.map(
-item=>({
-id:item.id,
-...item.data()
-})
+const q=query(
+
+notificationsRef,
+
+where("userId","==",userId),
+
+orderBy("createdAt","desc")
+
 );
 
+const snapshot=await getDocs(q);
 
-};
+return snapshot.docs.map(doc=>({
+
+id:doc.id,
+
+...doc.data()
+
+}));
+
+}
