@@ -1,111 +1,78 @@
 import React from "react";
+import {NavLink} from "react-router-dom";
 
+export default function Navbar(){
 
-interface ProductCardProps{
+const links=[
 
-title:string;
+["الرئيسية","/home"],
 
-price:string;
+["الحراج","/haraj"],
 
-image?:string;
+["الكتالوج","/catalog"],
 
-category?:string;
+["المفضلة","/favorites"],
 
-}
+["الإشعارات","/notifications"],
 
+["حسابي","/profile"]
 
-
-export default function ProductCard({
-title,
-price,
-image,
-category
-}:ProductCardProps){
-
+];
 
 return(
 
-<div
+<nav
 style={{
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+gap:"15px",
+padding:"18px",
 background:"#111",
-border:"1px solid #D4AF37",
-borderRadius:"18px",
-overflow:"hidden",
-color:"#fff"
+borderBottom:"1px solid #D4AF37",
+flexWrap:"wrap"
 }}
 >
 
+{
 
-{image &&
+links.map(link=>
 
-<img
-src={image}
-alt={title}
-style={{
-width:"100%",
-height:"220px",
-objectFit:"cover"
-}}
-/>
+<NavLink
+
+key={link[1]}
+
+to={String(link[1])}
+
+style={({isActive})=>({
+
+padding:"10px 18px",
+
+borderRadius:"10px",
+
+textDecoration:"none",
+
+fontWeight:"bold",
+
+background:isActive?"#D4AF37":"transparent",
+
+color:isActive?"#000":"#fff",
+
+transition:"0.2s"
+
+})}
+
+>
+
+{link[0]}
+
+</NavLink>
+
+)
 
 }
 
-
-
-<div
-style={{
-padding:"20px"
-}}
->
-
-
-<h2
-style={{
-color:"#D4AF37"
-}}
->
-
-{title}
-
-</h2>
-
-
-
-<p>
-
-{category}
-
-</p>
-
-
-
-<h3>
-
-{price} ريال
-
-</h3>
-
-
-<button
-style={{
-background:"#D4AF37",
-border:"none",
-padding:"10px 20px",
-borderRadius:"10px",
-fontWeight:"bold"
-}}
->
-
-عرض التفاصيل
-
-</button>
-
-
-</div>
-
-
-</div>
+</nav>
 
 );
-
 }
