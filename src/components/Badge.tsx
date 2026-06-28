@@ -1,29 +1,28 @@
 import React from "react";
 
-
 interface Props{
-
 text:string;
-
+color?:string;
+background?:string;
 }
 
-
-
 export default function Badge({
-text
+text,
+color="#000",
+background="#D4AF37"
 }:Props){
-
 
 return(
 
 <span
 style={{
-background:"#D4AF37",
-color:"#000",
+display:"inline-block",
 padding:"6px 12px",
-borderRadius:"15px",
-fontSize:"13px",
-fontWeight:"bold"
+borderRadius:"999px",
+background,
+color,
+fontWeight:"bold",
+fontSize:"13px"
 }}
 >
 
