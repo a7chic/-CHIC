@@ -1,116 +1,99 @@
-import React, { useState } from "react";
-import { storage } from "../firebase/config";
-import {
-ref,
-uploadBytes,
-getDownloadURL
-} from "firebase/storage";
-
+import React,{useRef,useState} from "react";
 
 interface Props{
-
 onUpload:(url:string)=>void;
-
 }
 
+export default function ImageUpload({onUpload}:Props){
 
+const inputRef=useRef<HTMLInputElement>(null);
 
-export default function ImageUpload({
-onUpload
-}:Props){
+const [preview,setPreview]=useState("");
 
+const choose=()=>{
 
-const [loading,setLoading]=useState(false);
-
-
-
-const uploadImage = async(
-e:React.ChangeEvent<HTMLInputElement>
-)=>{
-
-
-const file=e.target.files?.[0];
-
-
-if(!file) return;
-
-
-try{
-
-
-setLoading(true);
-
-
-const imageRef = ref(
-storage,
-`products/${Date.now()}-${file.name}`
-);
-
-
-
-await uploadBytes(
-imageRef,
-file
-);
-
-
-
-const url = await getDownloadURL(
-imageRef
-);
-
-
-
-onUpload(url);
-
-
-setLoading(false);
-
-
-}catch(error){
-
-
-setLoading(false);
-
-
-alert("فشل رفع الصورة");
-
-
-}
-
+inputRef.current?.click();
 
 };
 
+const change=(e:React.ChangeEvent<HTMLInputElement>)=>{
 
+const file=e.target.files?.[0];
+
+if(!file) return;
+
+const url=URL.createObjectURL(file);
+
+setPreview(url);
+
+onUpload(url);
+
+};
 
 return(
 
 <div>
 
 <input
+ref={inputRef}
 type="file"
 accept="image/*"
-onChange={uploadImage}
-style={{
-color:"#fff"
-}}
+style={{display:"none"}}
+onChange={change}
 />
 
-
-{loading &&
-
-<p
+<div
+onClick={choose}
 style={{
-color:"#D4AF37"
+border:"2px dashed #D4AF37",
+borderRadius:"15px",
+padding:"25px",
+textAlign:"center",
+cursor:"pointer",
+background:"#111"
 }}
 >
 
-جاري رفع الصورة...
+{
+
+preview?
+
+<img
+
+src={preview}
+
+alt="preview"
+
+style={{
+width:"100%",
+maxHeight:"350px",
+objectFit:"cover",
+borderRadius:"12px"
+}}
+
+/>
+
+:
+
+<div>
+
+<div style={{fontSize:"60px"}}>
+
+📷
+
+</div>
+
+<p style={{color:"#D4AF37"}}>
+
+اضغط لاختيار صورة
 
 </p>
 
+</div>
+
 }
 
+</div>
 
 </div>
 
