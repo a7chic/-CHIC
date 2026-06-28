@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-import ProductCard from "../components/ProductCard";
-import {
-getProducts,
-increaseViews,
-increaseLikes
-} from "../services/productService";
+import { getProducts, increaseLikes, increaseViews } from "../services/productService";
 
 export default function ProductDetails(){
 
@@ -22,9 +16,7 @@ const load=async()=>{
 
 const products:any[]=await getProducts();
 
-const item=products.find(
-(p)=>p.id===id
-);
+const item=products.find(p=>p.id===id);
 
 if(item){
 
@@ -44,12 +36,7 @@ if(!product){
 
 return(
 
-<div
-style={{
-padding:"40px",
-color:"#D4AF37"
-}}
->
+<div style={{padding:"40px",color:"#D4AF37"}}>
 
 جاري تحميل الإعلان...
 
@@ -75,65 +62,72 @@ likes:(product.likes||0)+1
 
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
-
-<ProductCard
-
-title={product.title}
-
-price={product.price}
-
-image={product.image}
-
-category={product.category}
-
-/>
+<div style={{color:"#fff"}}>
 
 <div
 style={{
 background:"#111",
 border:"1px solid #D4AF37",
 borderRadius:"20px",
-padding:"25px",
-marginTop:"20px"
+padding:"30px"
 }}
 >
 
-<h2
+<img
+
+src={product.image}
+
+alt={product.title}
+
 style={{
-color:"#D4AF37"
+
+width:"100%",
+
+maxHeight:"500px",
+
+objectFit:"cover",
+
+borderRadius:"15px",
+
+marginBottom:"20px"
+
 }}
->
+
+/>
+
+<h1 style={{color:"#D4AF37"}}>
 
 {product.title}
+
+</h1>
+
+<h2>
+
+💰 {product.price} ريال
 
 </h2>
 
 <p>
 
-💰 {product.price} ريال
+📂 {product.category}
 
 </p>
 
 <p>
 
-📍 {product.city||"غير محددة"}
+🏷️ {product.brand||"-"}
 
 </p>
 
 <p>
 
-🏷️ {product.brand||"غير محددة"}
+📍 {product.city||"-"}
 
 </p>
 
 <p>
 
-⭐ {product.condition||"غير محددة"}
+⭐ {product.condition||"-"}
 
 </p>
 
@@ -149,9 +143,12 @@ color:"#D4AF37"
 
 </p>
 
+<hr style={{margin:"25px 0"}}/>
+
 <p
 style={{
-lineHeight:"30px"
+lineHeight:"32px",
+color:"#ddd"
 }}
 >
 
@@ -162,9 +159,9 @@ lineHeight:"30px"
 <div
 style={{
 display:"flex",
-gap:"12px",
+gap:"15px",
 flexWrap:"wrap",
-marginTop:"20px"
+marginTop:"30px"
 }}
 >
 
@@ -173,7 +170,7 @@ onClick={like}
 style={{
 background:"#D4AF37",
 border:"none",
-padding:"12px 20px",
+padding:"14px 22px",
 borderRadius:"10px",
 fontWeight:"bold",
 cursor:"pointer"
@@ -190,7 +187,7 @@ style={{
 background:"#222",
 color:"#fff",
 border:"1px solid #555",
-padding:"12px 20px",
+padding:"14px 22px",
 borderRadius:"10px",
 cursor:"pointer"
 }}
@@ -201,12 +198,17 @@ cursor:"pointer"
 </button>
 
 <button
+onClick={()=>navigator.share?.({
+title:product.title,
+text:product.description
+})}
 style={{
 background:"#222",
 color:"#fff",
 border:"1px solid #555",
-padding:"12px 20px",
-borderRadius:"10px"
+padding:"14px 22px",
+borderRadius:"10px",
+cursor:"pointer"
 }}
 >
 
