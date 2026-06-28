@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { auth } from "../firebase/config";
 import { getProducts } from "../services/productService";
 
 export default function Profile(){
 
 const navigate=useNavigate();
 
-const {user}=useAuth();
+const user = auth.currentUser;
 
 const [myProducts,setMyProducts]=useState<any[]>([]);
 
