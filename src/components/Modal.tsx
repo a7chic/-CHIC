@@ -1,62 +1,62 @@
 import React from "react";
 
-
-interface ModalProps{
-
+interface Props{
 open:boolean;
-
 title:string;
-
 children:React.ReactNode;
-
 onClose:()=>void;
-
 }
-
-
 
 export default function Modal({
 open,
 title,
 children,
 onClose
-}:ModalProps){
-
+}:Props){
 
 if(!open) return null;
-
-
 
 return(
 
 <div
 style={{
 position:"fixed",
-inset:0,
-background:"rgba(0,0,0,0.7)",
+top:0,
+left:0,
+right:0,
+bottom:0,
+background:"rgba(0,0,0,.75)",
 display:"flex",
 justifyContent:"center",
 alignItems:"center",
-zIndex:999
+zIndex:9999
 }}
 >
 
-
 <div
 style={{
+width:"95%",
+maxWidth:"550px",
 background:"#111",
 border:"1px solid #D4AF37",
-borderRadius:"20px",
-padding:"30px",
-width:"90%",
-maxWidth:"500px",
+borderRadius:"18px",
+padding:"25px",
 color:"#fff"
 }}
 >
 
+<div
+style={{
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+marginBottom:"20px"
+}}
+>
 
 <h2
 style={{
+margin:0,
 color:"#D4AF37"
 }}
 >
@@ -65,31 +65,26 @@ color:"#D4AF37"
 
 </h2>
 
-
-
-{children}
-
-
-
 <button
 onClick={onClose}
 style={{
-marginTop:"20px",
-background:"#D4AF37",
+background:"transparent",
 border:"none",
-padding:"12px 25px",
-borderRadius:"10px",
-fontWeight:"bold"
+color:"#fff",
+fontSize:"22px",
+cursor:"pointer"
 }}
 >
 
-إغلاق
+✖
 
 </button>
 
-
 </div>
 
+{children}
+
+</div>
 
 </div>
 
