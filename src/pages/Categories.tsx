@@ -1,101 +1,96 @@
-import React from "react";
-import CategoryCard from "../components/CategoryCard";
-
-
-const categories=[
-
-{
-icon:"👗",
-title:"فساتين"
-},
-
-{
-icon:"👜",
-title:"شنط"
-},
-
-{
-icon:"👠",
-title:"أحذية"
-},
-
-{
-icon:"💍",
-title:"إكسسوارات"
-},
-
-{
-icon:"🧥",
-title:"عبايات"
-},
-
-{
-icon:"⌚",
-title:"ساعات"
-}
-
-];
-
-
+import React,{useEffect,useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {getProducts} from "../services/productService";
 
 export default function Categories(){
 
+const navigate=useNavigate();
+
+const [categories,setCategories]=useState<any[]>([]);
+
+useEffect(()=>{
+
+const load=async()=>{
+
+const products=await getProducts();
+
+const counts:any={};
+
+products.forEach((item:any)=>{
+
+counts[item.category]=(counts[item.category]||0)+1;
+
+});
+
+setCategories(Object.entries(counts));
+
+};
+
+load();
+
+},[]);
 
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
+<div style={{color:"#fff"}}>
 
+<h1 style={{color:"#D4AF37"}}>
 
-<h1
-style={{
-color:"#D4AF37"
-}}
->
-
-✨ أقسام أناقة CHIC
+📂 الأقسام
 
 </h1>
-
-
 
 <div
 style={{
 display:"grid",
-gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",
-gap:"20px"
+gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",
+gap:"20px",
+marginTop:"25px"
 }}
 >
 
-
 {
-categories.map(
-(item)=>(
 
+categories.map(([name,count])=>
 
-<CategoryCard
+<div
+key={String(name)}
+onClick={()=>navigate(`/search?category=${name}`)}
+style={{
+background:"#111",
+border:"1px solid #D4AF37",
+borderRadius:"18px",
+padding:"30px",
+cursor:"pointer",
+textAlign:"center"
+}}
+>
 
-key={item.title}
+<div style={{fontSize:"50px"}}>
 
-icon={item.icon}
-
-title={item.title}
-
-/>
-
-
-)
-
-)
-}
-
-
+📦
 
 </div>
 
+<h2 style={{color:"#D4AF37"}}>
+
+{name}
+
+</h2>
+
+<p>
+
+{Number(count)} إعلان
+
+</p>
+
+</div>
+
+)
+
+}
+
+</div>
 
 </div>
 
