@@ -1,67 +1,57 @@
 import {
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  query,
-  where
+collection,
+addDoc,
+deleteDoc,
+getDocs,
+query,
+where,
+doc
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
 
+const collectionName="favorites";
 
-// إضافة للمفضلة
-export const addFavorite = async (
-  userId:string,
-  productId:string
-) => {
+export async function addFavorite(data:any){
 
-  await addDoc(
-    collection(db,"favorites"),
-    {
-      userId,
-      productId,
-      createdAt:new Date()
-    }
-  );
+return await addDoc(
 
-};
+collection(db,collectionName),
 
+data
 
+);
 
-// جلب المفضلة
-export const getFavorites = async (
-  userId:string
-) => {
+}
 
-  const q = query(
-    collection(db,"favorites"),
-    where("userId","==",userId)
-  );
+export async function getFavorites(userId:string){
 
+const q=query(
 
-  const snapshot = await getDocs(q);
+collection(db,collectionName),
 
+where("userId","==",userId)
 
-  return snapshot.docs.map(
-    item=>({
-      id:item.id,
-      ...item.data()
-    })
-  );
+);
 
-};
+const snapshot=await getDocs(q);
 
+return snapshot.docs.map(item=>({
 
+id:item.id,
 
-// حذف من المفضلة
-export const removeFavorite = async (
-  id:string
-) => {
+...item.data()
 
-  await deleteDoc(
-    doc(db,"favorites",id)
-  );
+}));
 
-};
+}
+
+export async function removeFavorite(id:string){
+
+await deleteDoc(
+
+doc(db,collectionName,id)
+
+);
+
+}
