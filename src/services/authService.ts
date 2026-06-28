@@ -1,67 +1,131 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User
-} from "firebase/auth";
+import{
 
-import { auth } from "../firebase/config";
+createUserWithEmailAndPassword,
 
+signInWithEmailAndPassword,
 
-// إنشاء حساب جديد
-export const registerUser = async (
-  email: string,
-  password: string
-) => {
+signOut,
 
-  const result = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
+updateProfile,
 
-  return result.user;
+onAuthStateChanged
 
-};
+}from"firebase/auth";
 
+import{
 
+doc,
 
-// تسجيل الدخول
-export const loginUser = async (
-  email: string,
-  password: string
-) => {
+setDoc,
 
-  const result = await signInWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
+serverTimestamp
 
-  return result.user;
+}from"firebase/firestore";
 
-};
+import{
 
+auth,
 
+db
 
-// تسجيل الخروج
-export const logoutUser = async () => {
+}from"../firebase/config";
 
-  await signOut(auth);
+export async function registerUser(
 
-};
+name:string,
 
+email:string,
 
+password:string
 
-// مراقبة حالة المستخدم
-export const watchAuthState = (
-  callback:(user:User|null)=>void
-) => {
+){
 
-  return onAuthStateChanged(
-    auth,
-    callback
-  );
+const result=
 
-};
+await createUserWithEmailAndPassword(
+
+auth,
+
+email,
+
+password
+
+);
+
+await updateProfile(
+
+result.user,
+
+{
+
+displayName:name
+
+}
+
+);
+
+await setDoc(
+
+doc(db,"users",result.user.uid),
+
+{
+
+uid:result.user.uid,
+
+name,
+
+email,
+
+createdAt:serverTimestamp(),
+
+role:"user"
+
+}
+
+);
+
+return result.user;
+
+}
+
+export async function loginUser(
+
+email:string,
+
+password:string
+
+){
+
+const result=
+
+await signInWithEmailAndPassword(
+
+auth,
+
+email,
+
+password
+
+);
+
+return result.user;
+
+}
+
+export async function logoutUser(){
+
+await signOut(auth);
+
+}
+
+export function authListener(callback:any){
+
+return onAuthStateChanged(
+
+auth,
+
+callback
+
+);
+
+}
