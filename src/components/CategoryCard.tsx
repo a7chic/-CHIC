@@ -1,21 +1,24 @@
 import React from "react";
 
-
-interface CategoryProps{
+type Props={
 
 icon:string;
 
 title:string;
 
-}
+count?:number;
 
-
+};
 
 export default function CategoryCard({
-icon,
-title
-}:CategoryProps){
 
+icon,
+
+title,
+
+count=0
+
+}:Props){
 
 return(
 
@@ -26,22 +29,20 @@ border:"1px solid #D4AF37",
 borderRadius:"18px",
 padding:"25px",
 textAlign:"center",
-color:"#fff"
+cursor:"pointer",
+transition:"0.2s"
 }}
 >
 
-
 <div
 style={{
-fontSize:"45px"
+fontSize:"55px"
 }}
 >
 
 {icon}
 
 </div>
-
-
 
 <h3
 style={{
@@ -53,6 +54,15 @@ color:"#D4AF37"
 
 </h3>
 
+<p
+style={{
+color:"#888"
+}}
+>
+
+{count} إعلان
+
+</p>
 
 </div>
 
