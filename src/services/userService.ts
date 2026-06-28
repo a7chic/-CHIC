@@ -1,45 +1,75 @@
-import {
-getStorage,
-ref,
-uploadBytes,
-getDownloadURL,
-deleteObject
-} from "firebase/storage";
+import{
+collection,
+doc,
+getDoc,
+getDocs,
+updateDoc,
+query,
+where
+}from"firebase/firestore";
 
-const storage=getStorage();
+import{db}from"../firebase/config";
 
-export async function uploadImage(
+export async function getUser(uid:string){
 
-file:File,
+const snapshot=await getDoc(
 
-folder="products"
+doc(db,"users",uid)
 
-){
+);
 
-const fileName=
+if(!snapshot.exists()) return null;
 
-`${folder}/${Date.now()}-${file.name}`;
+return{
 
-const storageRef=ref(storage,fileName);
+id:snapshot.id,
 
-await uploadBytes(storageRef,file);
+...snapshot.data()
 
-return await getDownloadURL(storageRef);
+};
 
 }
 
-export async function deleteImage(
+export async function updateUser(
 
-url:string
+uid:string,
+
+data:any
 
 ){
 
-try{
+await updateDoc(
 
-const imageRef=ref(storage,url);
+doc(db,"users",uid),
 
-await deleteObject(imageRef);
+data
 
-}catch{}
+);
+
+}
+
+export async function getUserByEmail(
+
+email:string
+
+){
+
+const q=query(
+
+collection(db,"users"),
+
+where("email","==",email)
+
+);
+
+const snapshot=await getDocs(q);
+
+return snapshot.docs.map(doc=>({
+
+id:doc.id,
+
+...doc.data()
+
+}));
 
 }
