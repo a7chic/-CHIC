@@ -1,45 +1,30 @@
 import React from "react";
 
-
 interface Props{
-
 label:string;
-
-placeholder?:string;
-
-type?:string;
-
 value:string;
-
 onChange:(value:string)=>void;
-
+type?:string;
+placeholder?:string;
 }
-
-
 
 export default function InputField({
 label,
-placeholder,
-type="text",
 value,
-onChange
+onChange,
+type="text",
+placeholder=""
 }:Props){
-
 
 return(
 
-<div
-style={{
-marginBottom:"15px"
-}}
->
-
+<div style={{marginBottom:"18px"}}>
 
 <label
 style={{
 display:"block",
-color:"#D4AF37",
 marginBottom:"8px",
+color:"#D4AF37",
 fontWeight:"bold"
 }}
 >
@@ -48,23 +33,22 @@ fontWeight:"bold"
 
 </label>
 
-
-
 <input
 type={type}
-placeholder={placeholder}
 value={value}
+placeholder={placeholder}
 onChange={(e)=>onChange(e.target.value)}
 style={{
 width:"100%",
 padding:"14px",
-background:"#111",
+background:"#181818",
 color:"#fff",
 border:"1px solid #333",
-borderRadius:"10px"
+borderRadius:"10px",
+boxSizing:"border-box",
+outline:"none"
 }}
 />
-
 
 </div>
 
