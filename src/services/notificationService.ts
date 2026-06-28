@@ -10,24 +10,15 @@ serverTimestamp
 
 import { db } from "../firebase/config";
 
-const notificationsRef=collection(db,"notifications");
-
-export async function sendNotification(data:any){
+export async function addNotification(data:any){
 
 await addDoc(
-
-notificationsRef,
-
+collection(db,"notifications"),
 {
-
 ...data,
-
 read:false,
-
 createdAt:serverTimestamp()
-
 }
-
 );
 
 }
@@ -35,23 +26,16 @@ createdAt:serverTimestamp()
 export async function getNotifications(userId:string){
 
 const q=query(
-
-notificationsRef,
-
+collection(db,"notifications"),
 where("userId","==",userId),
-
 orderBy("createdAt","desc")
-
 );
 
 const snapshot=await getDocs(q);
 
 return snapshot.docs.map(doc=>({
-
 id:doc.id,
-
 ...doc.data()
-
 }));
 
 }
