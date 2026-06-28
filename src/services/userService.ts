@@ -1,82 +1,45 @@
 import {
-doc,
-getDoc,
-setDoc,
-updateDoc,
-serverTimestamp
-} from "firebase/firestore";
+getStorage,
+ref,
+uploadBytes,
+getDownloadURL,
+deleteObject
+} from "firebase/storage";
 
-import { db } from "../firebase/config";
+const storage=getStorage();
 
-export const createUserProfile = async (
-uid:string,
-data:any
-)=>{
+export async function uploadImage(
 
-await setDoc(
-doc(db,"users",uid),
-{
-...data,
-member:"عادية",
-verified:false,
-createdAt:serverTimestamp()
+file:File,
+
+folder="products"
+
+){
+
+const fileName=
+
+`${folder}/${Date.now()}-${file.name}`;
+
+const storageRef=ref(storage,fileName);
+
+await uploadBytes(storageRef,file);
+
+return await getDownloadURL(storageRef);
+
 }
-);
 
-};
+export async function deleteImage(
 
-export const getUserProfile = async (
-uid:string
-)=>{
+url:string
 
-const snapshot=await getDoc(
-doc(db,"users",uid)
-);
+){
 
-if(!snapshot.exists()) return null;
+try{
 
-return{
-id:snapshot.id,
-...snapshot.data()
-};
+const imageRef=ref(storage,url);
 
-};
+await deleteObject(imageRef);
 
-export const updateUserProfile = async(
-uid:string,
-data:any
-)=>{
+}catch{}
 
-await updateDoc(
-doc(db,"users",uid),
-data
-);
-
-};
-
-export const verifyUser = async(
-uid:string
-)=>{
-
-await updateDoc(
-doc(db,"users",uid),
-{
-verified:true
 }
-);
-
-};
-
-export const upgradeMembership = async(
-uid:string,
-member:string
-)=>{
-
-await updateDoc(
-doc(db,"users",uid),
-{
-member
-}
-);
-
-};
