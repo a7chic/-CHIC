@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { getProducts } from "../services/productService";
 
 export default function Favorites(){
 
@@ -11,56 +10,24 @@ const [favorites,setFavorites]=useState<any[]>([]);
 
 useEffect(()=>{
 
-const load=async()=>{
-
-const ids:string[]=JSON.parse(
+const data=JSON.parse(
 
 localStorage.getItem("favorites")||"[]"
 
 );
 
-const products:any[]=await getProducts();
-
-setFavorites(
-
-products.filter(
-
-item=>ids.includes(item.id)
-
-)
-
-);
-
-};
-
-load();
+setFavorites(data);
 
 },[]);
 
 return(
 
-<div
-style={{
-color:"#fff"
-}}
->
-
-<div
-style={{
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center",
-marginBottom:"25px",
-flexWrap:"wrap"
-}}
->
-
-<div>
+<div style={{color:"#fff"}}>
 
 <h1
 style={{
 color:"#D4AF37",
-margin:0
+marginBottom:"25px"
 }}
 >
 
@@ -68,59 +35,23 @@ margin:0
 
 </h1>
 
-<p
-style={{
-color:"#aaa"
-}}
->
-
-العناصر المحفوظة: {favorites.length}
-
-</p>
-
-</div>
-
-<button
-onClick={()=>navigate("/haraj")}
-style={{
-background:"#D4AF37",
-border:"none",
-padding:"12px 22px",
-borderRadius:"10px",
-fontWeight:"bold",
-cursor:"pointer"
-}}
->
-
-🛒 الذهاب للحراج
-
-</button>
-
-</div>
-
 {
 
 favorites.length===0?
 
-(
-
 <div
 style={{
 background:"#111",
+padding:"45px",
+borderRadius:"18px",
 border:"1px solid #D4AF37",
-borderRadius:"20px",
-padding:"60px",
 textAlign:"center"
 }}
 >
 
-<div
-style={{
-fontSize:"70px"
-}}
->
+<div style={{fontSize:"60px"}}>
 
-❤️
+💔
 
 </div>
 
@@ -134,19 +65,7 @@ color:"#D4AF37"
 
 </h2>
 
-<p
-style={{
-color:"#999"
-}}
->
-
-أضف المنتجات إلى المفضلة لتظهر هنا.
-
-</p>
-
 </div>
-
-)
 
 :
 
@@ -160,11 +79,11 @@ gap:"20px"
 
 {
 
-favorites.map(product=>(
+favorites.map((item:any)=>
 
 <div
-key={product.id}
-onClick={()=>navigate(`/product/${product.id}`)}
+key={item.id}
+onClick={()=>navigate(`/product/${item.id}`)}
 style={{
 cursor:"pointer"
 }}
@@ -172,19 +91,19 @@ cursor:"pointer"
 
 <ProductCard
 
-title={product.title}
+title={item.title}
 
-price={product.price}
+price={item.price}
 
-image={product.image}
+image={item.image}
 
-category={product.category}
+category={item.category}
 
 />
 
 </div>
 
-))
+)
 
 }
 
