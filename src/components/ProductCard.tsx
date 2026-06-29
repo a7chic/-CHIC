@@ -1,78 +1,71 @@
 import React from "react";
-import {NavLink} from "react-router-dom";
 
-export default function Navbar(){
+type Props = {
+  title: string;
+  price: string | number;
+  image?: string;
+  category?: string;
+};
 
-const links=[
+export default function ProductCard({
+  title,
+  price,
+  image,
+  category,
+}: Props) {
+  return (
+    <div
+      style={{
+        background: "#111",
+        border: "1px solid #D4AF37",
+        borderRadius: "18px",
+        overflow: "hidden",
+        cursor: "pointer",
+      }}
+    >
+      <img
+        src={image || "https://placehold.co/600x400?text=ANAQA+CHIC"}
+        alt={title}
+        style={{
+          width: "100%",
+          height: "220px",
+          objectFit: "cover",
+        }}
+      />
 
-["الرئيسية","/home"],
+      <div style={{ padding: "18px" }}>
+        <h3
+          style={{
+            color: "#fff",
+            margin: 0,
+            marginBottom: "10px",
+          }}
+        >
+          {title}
+        </h3>
 
-["الحراج","/haraj"],
+        <p
+          style={{
+            color: "#D4AF37",
+            fontWeight: "bold",
+            margin: 0,
+            marginBottom: "10px",
+          }}
+        >
+          {price} ر.س
+        </p>
 
-["الكتالوج","/catalog"],
-
-["المفضلة","/favorites"],
-
-["الإشعارات","/notifications"],
-
-["حسابي","/profile"]
-
-];
-
-return(
-
-<nav
-style={{
-display:"flex",
-justifyContent:"center",
-alignItems:"center",
-gap:"15px",
-padding:"18px",
-background:"#111",
-borderBottom:"1px solid #D4AF37",
-flexWrap:"wrap"
-}}
->
-
-{
-
-links.map(link=>
-
-<NavLink
-
-key={link[1]}
-
-to={String(link[1])}
-
-style={({isActive})=>({
-
-padding:"10px 18px",
-
-borderRadius:"10px",
-
-textDecoration:"none",
-
-fontWeight:"bold",
-
-background:isActive?"#D4AF37":"transparent",
-
-color:isActive?"#000":"#fff",
-
-transition:"0.2s"
-
-})}
-
->
-
-{link[0]}
-
-</NavLink>
-
-)
-
-}
-
-</nav>
-
-);
+        {category && (
+          <span
+            style={{
+              color: "#aaa",
+              fontSize: "14px",
+            }}
+          >
+            {category}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 }
