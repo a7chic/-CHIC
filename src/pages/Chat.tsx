@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getMessages, sendMessage } from "../services/chatService";
-// تم تعديل هذا السطر ليرجع خطوة إضافية للخلف ويصل لمجلد hooks بشكل صحيح
-import useAuth from "../hooks/useAuth";
+import { auth } from "../firebase/config";
 
 export default function Chat() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const user = auth.currentUser;
 
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState("");
