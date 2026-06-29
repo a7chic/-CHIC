@@ -6,7 +6,7 @@ import ImageUpload from "../components/ImageUpload";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 // تم تعديل هذا السطر بإضافة نقطتين ليرجع خطوة للخلف ويصل لمجلد hooks بشكل صحيح
-import useAuth from "../../hooks/useAuth";
+import useAuth from "../hooks/useAuth";
 
 export default function AddProduct() {
   const navigate = useNavigate();

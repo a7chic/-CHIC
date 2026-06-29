@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getMessages, sendMessage } from "../services/chatService";
 // تم تعديل هذا السطر ليرجع خطوة إضافية للخلف ويصل لمجلد hooks بشكل صحيح
-import useAuth from "../../hooks/useAuth";
+import useAuth from "../hooks/useAuth";
 
 export default function Chat() {
   const { id } = useParams();
