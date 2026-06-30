@@ -101,7 +101,6 @@ fontSize:"16px"
 </p>
 
 </div>
-</h1>
 
 <div
 style={{
