@@ -217,7 +217,7 @@ color:"#aaa"
 
 <button
 
-onClick={()=>navigate("/owner")}
+onClick={()=>navigate("/admin")
 
 style={{
 
