@@ -291,32 +291,42 @@ export default function Login() {
           </>
         )}
 
-        <div
-          style={{
-            marginTop: "25px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Link to="/register" style={{ color: "#D4AF37", textDecoration: "none" }}>
-            إنشاء حساب
-                   <Link 
-            to="/" 
-            style={{ 
-              color: "#999", 
-              textDecoration: "none" 
-            }}
-          >
-            العودة
-          </Link>
+<div
+  style={{
+    marginTop: "25px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }}
+>
 
-        </div>
+  <Link
+    to="/register"
+    style={{
+      color: "#D4AF37",
+      textDecoration: "none",
+    }}
+  >
+    إنشاء حساب
+  </Link>
 
-      </div>
 
-    </div>
+  <Link
+    to="/"
+    style={{
+      color: "#999",
+      textDecoration: "none",
+    }}
+  >
+    العودة
+  </Link>
 
-  );
+</div>
+</div>
+
+</div>
+
+
+);
 
 }
