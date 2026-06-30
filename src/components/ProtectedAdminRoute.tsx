@@ -1,29 +1,66 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { auth } from "../firebase/config";
+import { getUserRole } from "../firebase/roles";
 
-interface Props{
-children:React.ReactNode;
+interface Props {
+  children: React.ReactNode;
 }
 
-export default function ProtectedAdminRoute({
-children
-}:Props){
+export default function ProtectedAdminRoute({ children }: Props) {
 
-const user=auth.currentUser;
+  const user = auth.currentUser;
 
-if(!user){
+  const [loading, setLoading] = useState(true);
+  const [allowed, setAllowed] = useState(false);
 
-return <Navigate to="/login" replace />;
+  useEffect(() => {
 
-}
+    const checkRole = async () => {
 
-if(user.email!=="admin@chic.com"){
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-return <Navigate to="/home" replace />;
+      const role = await getUserRole(user.uid);
 
-}
+      setAllowed(role === "owner");
 
-return <>{children}</>;
+      setLoading(false);
 
+    };
+
+    checkRole();
+
+  }, [user]);
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#050505",
+          color: "#D4AF37",
+          fontSize: "22px",
+          fontWeight: "bold"
+        }}
+      >
+        جاري التحقق من الصلاحيات...
+      </div>
+    );
+  }
+
+  if (!allowed) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return <>{children}</>;
 }
