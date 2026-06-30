@@ -47,7 +47,7 @@ marginBottom:"25px"
 }}
 >
 
-👑 لوحة التحكم
+👑 غرفة صاحب موقع "ANAQA CHIC"
 
 </h1>
 
