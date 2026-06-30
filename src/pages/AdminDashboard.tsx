@@ -48,7 +48,40 @@ marginBottom:"25px"
 >
 
 👑 غرفة صاحب موقع "ANAQA CHIC"
+<div
+style={{
+background:"#111",
+border:"2px solid #D4AF37",
+borderRadius:"20px",
+padding:"20px",
+marginBottom:"25px",
+boxShadow:"0 0 30px rgba(212,175,55,.25)"
+}}
+>
 
+<h2 style={{color:"#D4AF37",marginTop:0}}>
+🛡️ مركز التحكم الملكي
+</h2>
+
+<p style={{color:"#ddd",lineHeight:"30px"}}>
+
+مرحباً بك صاحب موقع <b>ANAQA CHIC</b>.
+
+<br/><br/>
+
+من هذه الغرفة تستطيع:
+
+<br/>✔ إدارة جميع الإعلانات.
+<br/>✔ حذف أو تعديل أي إعلان.
+<br/>✔ حذف أي تعليق مخالف.
+<br/>✔ استقبال الشكاوى والبلاغات.
+<br/>✔ إدارة المشرفين.
+<br/>✔ متابعة أمان المنصة.
+<br/>✔ مراجعة حالات الاحتيال وإيقاف الحسابات المخالفة.
+
+</p>
+
+</div>
 </h1>
 
 <div
