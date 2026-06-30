@@ -43,41 +43,60 @@ return(
 <h1
 style={{
 color:"#D4AF37",
-marginBottom:"25px"
+marginBottom:"20px",
+fontSize:"34px"
 }}
 >
-
 👑 غرفة صاحب موقع "ANAQA CHIC"
+</h1>
+
 <div
 style={{
-background:"#111",
+background:"linear-gradient(145deg,#181818,#090909)",
 border:"2px solid #D4AF37",
-borderRadius:"20px",
-padding:"20px",
-marginBottom:"25px",
-boxShadow:"0 0 30px rgba(212,175,55,.25)"
+borderRadius:"24px",
+padding:"25px",
+marginBottom:"30px",
+boxShadow:"0 0 35px rgba(212,175,55,.25)"
 }}
 >
 
-<h2 style={{color:"#D4AF37",marginTop:0}}>
+<h2
+style={{
+color:"#D4AF37",
+marginTop:0,
+marginBottom:"18px"
+}}
+>
+
 🛡️ مركز التحكم الملكي
+
 </h2>
 
-<p style={{color:"#ddd",lineHeight:"30px"}}>
+<p
+style={{
+color:"#ddd",
+lineHeight:"34px",
+fontSize:"16px"
+}}
+>
 
-مرحباً بك صاحب موقع <b>ANAQA CHIC</b>.
+مرحباً بك في غرفة صاحب موقع <b>ANAQA CHIC</b>.
 
 <br/><br/>
 
-من هذه الغرفة تستطيع:
+من هذه الغرفة تستطيع إدارة المنصة بالكامل.
 
 <br/>✔ إدارة جميع الإعلانات.
-<br/>✔ حذف أو تعديل أي إعلان.
-<br/>✔ حذف أي تعليق مخالف.
-<br/>✔ استقبال الشكاوى والبلاغات.
+<br/>✔ تعديل أو حذف أي إعلان.
+<br/>✔ إدارة المستخدمين.
 <br/>✔ إدارة المشرفين.
-<br/>✔ متابعة أمان المنصة.
-<br/>✔ مراجعة حالات الاحتيال وإيقاف الحسابات المخالفة.
+<br/>✔ استقبال الشكاوى والبلاغات.
+<br/>✔ متابعة محاولات الاحتيال.
+<br/>✔ مراجعة التنبيهات الأمنية.
+<br/>✔ حظر أو إعادة تفعيل الحسابات.
+<br/>✔ الاطلاع على سجل العمليات.
+<br/>✔ متابعة إحصائيات الموقع.
 
 </p>
 
