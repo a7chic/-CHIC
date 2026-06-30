@@ -157,3 +157,49 @@ textAlign:"center"
 );
 
 }
+)
+
+}
+
+</div>
+
+<div
+style={{
+marginTop:"40px",
+background:"#111",
+border:"1px solid #D4AF37",
+borderRadius:"20px",
+padding:"25px"
+}}
+>
+
+<h2 style={{color:"#D4AF37"}}>
+
+🚨 مركز مكافحة الاحتيال
+
+</h2>
+
+<ul
+style={{
+lineHeight:"38px",
+color:"#ddd",
+paddingRight:"20px"
+}}
+>
+
+<li>مراجعة البلاغات الواردة.</li>
+<li>تنبيهات عند اكتشاف نشاط مشبوه.</li>
+<li>مراجعة الحسابات المخالفة.</li>
+<li>إيقاف أو إعادة تفعيل الحسابات.</li>
+<li>إدارة الإعلانات المخالفة.</li>
+<li>سجل العمليات الإدارية.</li>
+
+</ul>
+
+</div>
+
+</div>
+
+);
+
+}
