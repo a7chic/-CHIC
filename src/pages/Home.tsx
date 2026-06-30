@@ -216,31 +216,18 @@ color:"#aaa"
 
 
 <button
-
-onClick={()=>navigate("/admin")
-
-style={{
-
-background:"#D4AF37",
-
-border:"none",
-
-padding:"12px 25px",
-
-borderRadius:"12px",
-
-fontWeight:"bold",
-
-cursor:"pointer"
-
-}}
-
+  onClick={() => navigate("/admin")}
+  style={{
+    background: "#D4AF37",
+    border: "none",
+    padding: "12px 25px",
+    borderRadius: "12px",
+    fontWeight: "bold",
+    cursor: "pointer"
+  }}
 >
-
-دخول الغرفة
-
+  دخول الغرفة
 </button>
-
 
 </div>
 
