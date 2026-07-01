@@ -1,858 +1,568 @@
-
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase/config";
 import { loginUser } from "../services/authService";
 
-type LoginType =
-  | "owner"
-  | "admin"
-  | "user";
+type LoginType = "owner" | "admin";
 
 export default function Login(): JSX.Element {
-
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
 
-  const [loginType, setLoginType] =
-    useState<LoginType>("user");
+  const [loginType, setLoginType] = useState<LoginType>("owner");
 
-  const [showOtp, setShowOtp] =
-    useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
 
-  const [otpCode, setOtpCode] =
-    useState("");
+  const [ownerMessage, setOwnerMessage] = useState(false);
 
-  const [generatedOtp, setGeneratedOtp] =
-    useState("");
+  const ownerMarquee =
+    'تم تسجيل دخول صاحب موقع "أناقة CHIC" 👑 نرحب بكم ونتمنى لكم تجربة راقية وآمنة. ' +
+    "للاقتراحات والشكاوى يرجى التواصل مع إدارة الموقع مباشرة حفاظًا على حقوق الجميع.";
 
-  const [stealthMode, setStealthMode] =
-    useState(false);
-
-  const [showOwnerMarquee, setShowOwnerMarquee] =
-    useState(false);
-
-  const ownerMessage =
-
-    'تم تسجيل دخول صاحب موقع "أناقة CHIC" 👑، نرحب بكم ونتمنى لكم تجربة تسوق استثنائية، وفي حال وجود أي شكوى أو ملاحظة يرجى التواصل مع صاحب الموقع مباشرة.';
-
-  async function handleLogin() {
-
+  const login = async () => {
     if (!email || !password) {
-
-      alert("يرجى إدخال البريد الإلكتروني وكلمة المرور.");
-
+      alert("أدخل البريد وكلمة المرور");
       return;
-
     }
 
     try {
-
       setLoading(true);
 
-      await loginUser(
-
-        email.trim(),
-
-        password
-
-      );
+      await loginUser(email.trim(), password);
 
       if (!auth.currentUser?.emailVerified) {
-
-        alert("يجب تفعيل البريد الإلكتروني أولاً.");
-
-        setLoading(false);
-
+        alert("يرجى تفعيل البريد الإلكتروني");
         return;
-
       }
 
       const code = Math.floor(
-
-        100000 +
-
-        Math.random() * 900000
-
+        100000 + Math.random() * 900000
       ).toString();
 
       setGeneratedOtp(code);
 
-      alert(
-
-        `رمز التحقق هو : ${code}`
-
-      );
+      alert("رمز التحقق: " + code);
 
       setShowOtp(true);
 
-    }
-
-    catch {
-
-      alert(
-
-        "البريد الإلكتروني أو كلمة المرور غير صحيحة."
-
-      );
-
-    }
-
-    finally {
-
+    } catch {
+      alert("بيانات الدخول غير صحيحة");
+    } finally {
       setLoading(false);
-
     }
+  };
 
-  }
 
-  function handleVerifyOtp() {
+  const verifyOtp = () => {
 
-    if (otpCode !== generatedOtp) {
-
-      alert("رمز التحقق غير صحيح.");
-
+    if (otp !== generatedOtp) {
+      alert("رمز التحقق غير صحيح");
       return;
-
     }
+
 
     if (loginType === "owner") {
 
-      try {
+      const sound = new Audio(
+        "/sounds/owner-login-alert.mp3"
+      );
 
-        new Audio(
+      sound.volume = 0.8;
+      sound.play().catch(()=>{});
 
-          "/sounds/owner-login-alert.mp3"
 
-        ).play();
+      setOwnerMessage(true);
 
-      }
+      setTimeout(()=>{
+        setOwnerMessage(false);
+      },20000);
 
-      catch {}
-
-      setShowOwnerMarquee(true);
-
-      setTimeout(() => {
-
-        setShowOwnerMarquee(false);
-
-      }, 20000);
-
-    }
-
-    if (
-
-      loginType === "owner" ||
-
-      loginType === "admin"
-
-    ) {
 
       navigate("/admin");
 
-      return;
+    } else {
+
+      navigate("/admin");
 
     }
 
-    navigate("/");
+  };
 
-  }
 
   return (
-
-    <>
-
-      <div
-        style={{
-          minHeight: "100vh",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background:
-            "radial-gradient(circle at top,#3a2a10 0%,#080808 45%,#000 100%)",
-          padding: "25px",
-          boxSizing: "border-box",
-          direction: "rtl",
-          fontFamily:
-            "Tahoma, Arial, sans-serif",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-
-        {/* الخلفية الذهبية المتحركة */}
-
+    <div
+      style={{
+        minHeight:"100vh",
+        background:"#030303",
+        color:"#fff",
+        direction:"rtl",
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+        padding:"20px",
+        fontFamily:
+        "Cairo, system-ui, sans-serif"
+      }}
+    >
+      {ownerMessage && (
         <div
           style={{
-            position:"absolute",
-            inset:0,
+            position:"fixed",
+            top:0,
+            right:0,
+            left:0,
+            zIndex:9999,
             background:
-              "linear-gradient(120deg,transparent,rgba(212,175,55,.08),transparent)",
-            animation:
-              "goldMove 8s infinite linear",
+            "linear-gradient(90deg,#8b6508,#f5c84c,#8b6508)",
+            color:"#000",
+            padding:"12px",
+            overflow:"hidden",
+            fontWeight:"bold"
           }}
-        />
-
-        {/* رسالة دخول صاحب الموقع */}
-
-        {showOwnerMarquee && (
+        >
 
           <div
             style={{
-              position:"fixed",
-              top:0,
-              left:0,
-              right:0,
-              zIndex:9999,
-              background:
-                "linear-gradient(90deg,#111,#D4AF37,#111)",
-              color:"#000",
-              padding:"12px",
-              overflow:"hidden",
               whiteSpace:"nowrap",
-              fontWeight:900,
+              animation:
+              "ownerMove 20s linear infinite"
+            }}
+          >
+            {ownerMarquee}
+          </div>
+
+          <style>
+            {`
+              @keyframes ownerMove {
+                from {
+                  transform:translateX(100%);
+                }
+                to {
+                  transform:translateX(-100%);
+                }
+              }
+            `}
+          </style>
+
+        </div>
+      )}
+
+
+      <div
+        style={{
+          width:"100%",
+          maxWidth:"950px",
+          background:
+          "linear-gradient(145deg,#111,#020202)",
+          border:"1px solid #b88920",
+          borderRadius:"30px",
+          padding:"35px",
+          boxShadow:
+          "0 0 60px rgba(212,175,55,.25)"
+        }}
+      >
+
+
+        <div
+          style={{
+            textAlign:"center",
+            marginBottom:"35px"
+          }}
+        >
+
+          <div
+            style={{
+              fontSize:"55px"
+            }}
+          >
+            👑
+          </div>
+
+
+          <h1
+            style={{
+              color:"#d4af37",
+              fontSize:"45px",
+              letterSpacing:"3px",
+              margin:0
+            }}
+          >
+            AN AQA CHIC
+          </h1>
+
+
+          <p
+            style={{
+              color:"#d4af37",
+              fontSize:"18px"
+            }}
+          >
+            أناقة تفوق الخيال
+          </p>
+
+        </div>
+
+
+
+        <div
+          style={{
+            display:"flex",
+            gap:"25px",
+            alignItems:"stretch",
+            justifyContent:"center"
+          }}
+        >
+        {/* صاحب الموقع - الجانب الأيمن */}
+
+        <div
+          style={{
+            flex:1.4,
+            minHeight:"430px",
+            background:
+            "linear-gradient(160deg,#111,#050505)",
+            border:"2px solid #d4af37",
+            borderRadius:"25px",
+            padding:"25px",
+            textAlign:"center",
+            display:"flex",
+            flexDirection:"column",
+            justifyContent:"center",
+            boxShadow:
+            "0 0 35px rgba(212,175,55,.25)"
+          }}
+        >
+
+          <div
+            style={{
+              fontSize:"90px",
+              marginBottom:"15px"
+            }}
+          >
+            👑🪑
+          </div>
+
+
+          <h2
+            style={{
+              color:"#d4af37",
+              fontSize:"32px",
+              margin:"10px 0"
+            }}
+          >
+            صاحب موقع
+            <br/>
+            "أناقة CHIC"
+          </h2>
+
+
+          <p
+            style={{
+              color:"#ddd",
+              fontSize:"18px",
+              lineHeight:1.8
+            }}
+          >
+            الإدارة العليا والتحكم الكامل
+            <br/>
+            بصلاحيات الموقع
+          </p>
+
+
+          <button
+            type="button"
+            onClick={()=>{
+              setLoginType("owner");
+            }}
+            style={{
+              marginTop:"25px",
+              padding:"16px",
+              borderRadius:"15px",
+              border:"none",
+              background:
+              "linear-gradient(90deg,#b88619,#f4d06f)",
+              fontSize:"20px",
+              fontWeight:"bold",
+              cursor:"pointer"
+            }}
+          >
+            👑 دخول الإدارة العليا
+          </button>
+
+
+        </div>
+
+
+
+        {/* المشرفين والمراقبين - الجانب الأيسر */}
+
+        <div
+          style={{
+            flex:0.8,
+            minHeight:"330px",
+            background:
+            "linear-gradient(160deg,#111,#050505)",
+            border:"1px solid #d4af37",
+            borderRadius:"25px",
+            padding:"25px",
+            textAlign:"center",
+            display:"flex",
+            flexDirection:"column",
+            justifyContent:"center"
+          }}
+        >
+
+
+          <div
+            style={{
+              fontSize:"55px"
+            }}
+          >
+            🛡️
+          </div>
+
+
+          <h2
+            style={{
+              color:"#d4af37",
+              fontSize:"25px"
+            }}
+          >
+            المشرفين
+            <br/>
+            والمراقبين
+          </h2>
+
+
+          <p
+            style={{
+              color:"#ccc",
+              lineHeight:1.7
+            }}
+          >
+            متابعة وإدارة أقسام الموقع
+            <br/>
+            حسب الصلاحيات
+          </p>
+
+
+          <button
+            type="button"
+            onClick={()=>{
+              setLoginType("admin");
+            }}
+            style={{
+              marginTop:"20px",
+              padding:"14px",
+              borderRadius:"14px",
+              border:"none",
+              background:
+              "linear-gradient(90deg,#b88619,#f4d06f)",
+              fontWeight:"bold",
+              cursor:"pointer"
+            }}
+          >
+            🛡️ دخول المشرفين
+          </button>
+
+
+        </div>
+
+
+      </div>
+        {/* نموذج تسجيل الدخول */}
+
+        <div
+          style={{
+            marginTop:"35px",
+            background:
+            "linear-gradient(160deg,#0d0d0d,#030303)",
+            border:"1px solid #8b6508",
+            borderRadius:"25px",
+            padding:"30px",
+          }}
+        >
+
+          <h2
+            style={{
+              textAlign:"center",
+              color:"#d4af37",
+              fontSize:"30px",
+              marginBottom:"25px"
+            }}
+          >
+            ✦ تسجيل الدخول ✦
+          </h2>
+
+
+
+          {!showOtp ? (
+
+          <>
+
+          <input
+            type="email"
+            placeholder="البريد الإلكتروني"
+            value={email}
+            onChange={(e)=>setEmail(e.target.value)}
+            style={{
+              width:"100%",
+              boxSizing:"border-box",
+              padding:"17px",
+              marginBottom:"15px",
+              borderRadius:"15px",
+              background:"#111",
+              color:"#fff",
+              border:"1px solid #8b6508",
+              fontSize:"17px",
+              textAlign:"right"
+            }}
+          />
+
+
+          <input
+            type="password"
+            placeholder="كلمة المرور"
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
+            style={{
+              width:"100%",
+              boxSizing:"border-box",
+              padding:"17px",
+              marginBottom:"15px",
+              borderRadius:"15px",
+              background:"#111",
+              color:"#fff",
+              border:"1px solid #8b6508",
+              fontSize:"17px",
+              textAlign:"right"
+            }}
+          />
+
+
+          </>
+
+          ) : (
+
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="أدخل رمز التحقق OTP"
+            value={otp}
+            onChange={(e)=>setOtp(e.target.value)}
+            style={{
+              width:"100%",
+              boxSizing:"border-box",
+              padding:"17px",
+              borderRadius:"15px",
+              background:"#111",
+              color:"#fff",
+              border:"1px solid #8b6508",
+              fontSize:"18px",
+              textAlign:"center"
+            }}
+          />
+
+          )}
+
+
+
+
+          <button
+            type="button"
+            disabled={loading}
+            onClick={
+              showOtp ? verifyOtp : login
+            }
+            style={{
+              width:"100%",
+              marginTop:"25px",
+              padding:"18px",
+              borderRadius:"18px",
+              border:"none",
+              cursor:"pointer",
+              background:
+              "linear-gradient(90deg,#b88619,#f4d06f)",
+              color:"#000",
+              fontSize:"22px",
+              fontWeight:"bold",
+              boxShadow:
+              "0 0 25px rgba(212,175,55,.35)"
+            }}
+          >
+
+          {loading
+          ?
+          "جاري التحقق..."
+          :
+          showOtp
+          ?
+          "تأكيد الرمز ودخول أناقة CHIC"
+          :
+          "🔒 دخول الآن"}
+
+          </button>
+
+
+
+          <div
+            style={{
+              display:"flex",
+              justifyContent:"space-between",
+              marginTop:"25px",
+              color:"#d4af37",
+              fontSize:"18px"
             }}
           >
 
             <span
               style={{
-                display:"inline-block",
-                animation:
-                  "marquee 18s linear infinite",
+                cursor:"pointer"
               }}
             >
-              {ownerMessage}
+              إنشاء حساب جديد
             </span>
+
+
+            <span
+              style={{
+                cursor:"pointer"
+              }}
+            >
+              العودة
+            </span>
+
 
           </div>
 
-        )}
+
+        </div>
+        </div>
 
 
         <div
           style={{
-            width:"100%",
-            maxWidth:"1250px",
-            position:"relative",
-            zIndex:2,
+            textAlign:"center",
+            marginTop:"35px",
+            color:"#777",
+            fontSize:"14px"
           }}
         >
-
-
-          {/* الشعار العلوي */}
-
           <div
             style={{
-              textAlign:"center",
-              marginBottom:"45px",
+              color:"#d4af37",
+              fontSize:"22px",
+              marginBottom:"8px"
             }}
           >
-
-            <div
-              style={{
-                fontSize:"55px",
-                color:"#D4AF37",
-                textShadow:
-                  "0 0 30px rgba(212,175,55,.7)",
-              }}
-            >
-              ♛
-            </div>
-
-
-            <h1
-              style={{
-                margin:0,
-                color:"#D4AF37",
-                fontSize:"55px",
-                letterSpacing:"3px",
-                fontFamily:"Georgia,serif",
-              }}
-            >
-              ANAQA CHIC
-            </h1>
-
-
-            <p
-              style={{
-                color:"#d9b45b",
-                fontSize:"18px",
-                marginTop:"10px",
-              }}
-            >
-              أناقة تفوق الخيال
-            </p>
-
+            👑 ANAQA CHIC
           </div>
 
-
-          {/* الحاوية الرئيسية */}
-
-          <div
-            style={{
-              display:"grid",
-              gridTemplateColumns:
-                "repeat(auto-fit,minmax(300px,1fr))",
-              gap:"28px",
-              alignItems:"stretch",
-            }}
-          >
-
-            {/* بطاقة صاحب موقع "أناقة CHIC" */}
-
-            <div
-              style={{
-                background:
-                  "linear-gradient(145deg,#111,#050505)",
-                border:
-                  loginType === "owner"
-                    ? "2px solid #D4AF37"
-                    : "1px solid rgba(212,175,55,.25)",
-                borderRadius:"30px",
-                padding:"30px",
-                textAlign:"center",
-                boxShadow:
-                  "0 20px 50px rgba(0,0,0,.6)",
-                transition:"all .3s ease",
-              }}
-
-              onClick={() =>
-                setLoginType("owner")
-              }
-
-            >
-
-              <div
-                style={{
-                  width:"85px",
-                  height:"85px",
-                  margin:"0 auto 20px",
-                  borderRadius:"50%",
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  background:
-                    "linear-gradient(135deg,#FFE082,#D4AF37)",
-                  fontSize:"40px",
-                  boxShadow:
-                    "0 0 35px rgba(212,175,55,.5)",
-                }}
-              >
-                👑
-              </div>
-
-
-              <h2
-                style={{
-                  color:"#D4AF37",
-                  fontSize:"23px",
-                  marginBottom:"12px",
-                }}
-              >
-                صاحب موقع "أناقة CHIC"
-              </h2>
-
-
-              <p
-                style={{
-                  color:"#aaa",
-                  lineHeight:"1.8",
-                  fontSize:"14px",
-                }}
-              >
-                الإدارة العليا والتحكم الكامل
-                <br />
-                بصلاحيات الموقع
-              </p>
-
-
-              <button
-                type="button"
-                style={{
-                  width:"100%",
-                  marginTop:"20px",
-                  padding:"15px",
-                  borderRadius:"18px",
-                  border:"none",
-                  background:"#D4AF37",
-                  color:"#111",
-                  fontWeight:"900",
-                  cursor:"pointer",
-                }}
-              >
-                دخول الإدارة العليا
-              </button>
-
-
-            </div>
-
-
-
-            {/* بطاقة المشرفين والمراقبين */}
-
-
-            <div
-              style={{
-                background:
-                  "linear-gradient(145deg,#111,#050505)",
-                border:
-                  loginType === "admin"
-                    ? "2px solid #D4AF37"
-                    : "1px solid rgba(212,175,55,.25)",
-                borderRadius:"30px",
-                padding:"30px",
-                textAlign:"center",
-                boxShadow:
-                  "0 20px 50px rgba(0,0,0,.6)",
-                transition:"all .3s ease",
-              }}
-
-              onClick={() =>
-                setLoginType("admin")
-              }
-
-            >
-
-              <div
-                style={{
-                  width:"85px",
-                  height:"85px",
-                  margin:"0 auto 20px",
-                  borderRadius:"50%",
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  background:
-                    "linear-gradient(135deg,#FFE082,#D4AF37)",
-                  fontSize:"40px",
-                }}
-              >
-                🛡️
-              </div>
-
-
-              <h2
-                style={{
-                  color:"#D4AF37",
-                  fontSize:"23px",
-                  marginBottom:"12px",
-                }}
-              >
-                المشرفين والمراقبين
-              </h2>
-
-
-              <p
-                style={{
-                  color:"#aaa",
-                  lineHeight:"1.8",
-                }}
-              >
-                متابعة وإدارة أقسام الموقع
-                <br />
-                حسب الصلاحيات
-              </p>
-
-
-              <button
-                type="button"
-                style={{
-                  width:"100%",
-                  marginTop:"20px",
-                  padding:"15px",
-                  borderRadius:"18px",
-                  border:"none",
-                  background:"#D4AF37",
-                  color:"#111",
-                  fontWeight:"900",
-                  cursor:"pointer",
-                }}
-              >
-                دخول المشرفين
-              </button>
-
-
-            </div>
-
-            {/* بطاقة المستخدمين والزوار */}
-
-            <div
-              style={{
-                background:
-                  "linear-gradient(145deg,#111,#050505)",
-                border:
-                  loginType === "user"
-                    ? "2px solid #D4AF37"
-                    : "1px solid rgba(212,175,55,.25)",
-                borderRadius:"30px",
-                padding:"30px",
-                textAlign:"center",
-                boxShadow:
-                  "0 20px 50px rgba(0,0,0,.6)",
-              }}
-
-              onClick={() =>
-                setLoginType("user")
-              }
-
-            >
-
-              <div
-                style={{
-                  width:"85px",
-                  height:"85px",
-                  margin:"0 auto 20px",
-                  borderRadius:"50%",
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  background:
-                    "linear-gradient(135deg,#FFE082,#D4AF37)",
-                  fontSize:"40px",
-                }}
-              >
-                👤
-              </div>
-
-
-              <h2
-                style={{
-                  color:"#D4AF37",
-                  fontSize:"23px",
-                  marginBottom:"12px",
-                }}
-              >
-                المستخدمين والزوار
-              </h2>
-
-
-              <p
-                style={{
-                  color:"#aaa",
-                  lineHeight:"1.8",
-                }}
-              >
-                التسوق والاستفادة من خدمات
-                <br />
-                أناقة CHIC
-              </p>
-
-
-              <button
-                type="button"
-                style={{
-                  width:"100%",
-                  marginTop:"20px",
-                  padding:"15px",
-                  borderRadius:"18px",
-                  border:"none",
-                  background:"#D4AF37",
-                  color:"#111",
-                  fontWeight:"900",
-                  cursor:"pointer",
-                }}
-              >
-                دخول المستخدمين
-              </button>
-
-
-            </div>
-
-
-          </div>
-
-
-
-          {/* صندوق تسجيل الدخول */}
-
-
-          <div
-            style={{
-              marginTop:"40px",
-              maxWidth:"500px",
-              marginLeft:"auto",
-              marginRight:"auto",
-              background:
-                "rgba(15,15,15,.95)",
-              border:
-                "1px solid rgba(212,175,55,.3)",
-              borderRadius:"30px",
-              padding:"35px",
-              boxShadow:
-                "0 25px 70px rgba(0,0,0,.7)",
-            }}
-          >
-
-
-            <h2
-              style={{
-                color:"#fff",
-                textAlign:"center",
-                marginBottom:"30px",
-                fontSize:"28px",
-              }}
-            >
-              تسجيل الدخول
-            </h2>
-
-
-            {!showOtp ? (
-
-              <>
-
-                <input
-                  type="email"
-                  placeholder="البريد الإلكتروني"
-                  value={email}
-                  onChange={(e)=>
-                    setEmail(e.target.value)
-                  }
-
-                  style={{
-                    width:"100%",
-                    padding:"17px",
-                    borderRadius:"18px",
-                    background:"#080808",
-                    color:"#fff",
-                    border:
-                    "1px solid #333",
-                    marginBottom:"18px",
-                    boxSizing:"border-box",
-                    outline:"none",
-                  }}
-                />
-
-
-                <input
-                  type="password"
-                  placeholder="كلمة المرور"
-                  value={password}
-                  onChange={(e)=>
-                    setPassword(e.target.value)
-                  }
-
-                  style={{
-                    width:"100%",
-                    padding:"17px",
-                    borderRadius:"18px",
-                    background:"#080808",
-                    color:"#fff",
-                    border:
-                    "1px solid #333",
-                    marginBottom:"18px",
-                    boxSizing:"border-box",
-                    outline:"none",
-                  }}
-                />
-
-
-              </>
-
-            ) : (
-
-              <input
-                type="text"
-                placeholder="رمز التحقق OTP"
-                value={otpCode}
-                maxLength={6}
-                onChange={(e)=>
-                  setOtpCode(
-                    e.target.value.replace(/\D/g,"")
-                  )
-                }
-
-                style={{
-                  width:"100%",
-                  padding:"17px",
-                  borderRadius:"18px",
-                  background:"#080808",
-                  color:"#fff",
-                  border:
-                  "2px solid #D4AF37",
-                  textAlign:"center",
-                  letterSpacing:"8px",
-                  fontSize:"22px",
-                  boxSizing:"border-box",
-                  outline:"none",
-                }}
-              />
-
-            )}
-
-            {/* وضع التخفي لصاحب الموقع */}
-
-            {loginType === "owner" && (
-
-              <div
-                style={{
-                  display:"flex",
-                  justifyContent:"space-between",
-                  alignItems:"center",
-                  background:"#111",
-                  padding:"15px",
-                  borderRadius:"18px",
-                  border:
-                    "1px solid rgba(212,175,55,.25)",
-                  marginBottom:"20px",
-                }}
-              >
-
-                <span
-                  style={{
-                    color:"#D4AF37",
-                    fontWeight:700,
-                  }}
-                >
-                  🔴 وضع التخفي
-                </span>
-
-
-                <input
-                  type="checkbox"
-                  checked={stealthMode}
-                  onChange={(e)=>
-                    setStealthMode(
-                      e.target.checked
-                    )
-                  }
-
-                  style={{
-                    width:"22px",
-                    height:"22px",
-                    accentColor:"#D4AF37",
-                  }}
-                />
-
-              </div>
-
-            )}
-
-
-
-            {/* زر الدخول الرئيسي */}
-
-
-            <button
-              type="button"
-              disabled={loading}
-
-              onClick={
-                showOtp
-                  ? handleVerifyOtp
-                  : handleLogin
-              }
-
-              style={{
-                width:"100%",
-                padding:"18px",
-                borderRadius:"22px",
-                border:"none",
-
-                background:
-                "linear-gradient(135deg,#FFF0A8,#D4AF37,#8C6500)",
-
-                color:"#111",
-
-                fontSize:"18px",
-
-                fontWeight:900,
-
-                cursor:
-                  loading
-                  ? "not-allowed"
-                  : "pointer",
-
-                boxShadow:
-                  "0 15px 40px rgba(212,175,55,.35)",
-
-                marginTop:"20px",
-
-              }}
-            >
-
-              {
-
-                loading
-
-                ? "جارٍ التحقق..."
-
-                :
-
-                showOtp
-
-                ? "🔐 تأكيد رمز التحقق"
-
-                :
-
-                "🚀 دخول أناقة CHIC"
-
-              }
-
-
-            </button>
-
-
-
-            <div
-              style={{
-                marginTop:"28px",
-                display:"flex",
-                justifyContent:"space-between",
-              }}
-            >
-
-
-              <Link
-                to="/register"
-
-                style={{
-                  color:"#D4AF37",
-                  textDecoration:"none",
-                  fontWeight:700,
-                }}
-              >
-                إنشاء حساب
-              </Link>
-
-
-              <Link
-                to="/"
-
-                style={{
-                  color:"#999",
-                  textDecoration:"none",
-                }}
-              >
-                العودة
-              </Link>
-
-
-            </div>
-
-
-
-            <p
-              style={{
-                textAlign:"center",
-                color:"#666",
-                marginTop:"30px",
-                fontSize:"13px",
-              }}
-            >
-              © ANAQA CHIC
-              <br/>
-              جميع الحقوق محفوظة
-            </p>
-
-
-          </div>
-
-
+          جميع الحقوق محفوظة ©
         </div>
 
 
@@ -861,48 +571,45 @@ export default function Login(): JSX.Element {
 
 
       <style>
-
         {`
 
-          @keyframes marquee {
+        *{
+          box-sizing:border-box;
+        }
 
-            from {
 
-              transform:translateX(100%);
+        input::placeholder{
+          color:#888;
+        }
 
-            }
 
-            to {
+        button:hover{
+          transform:translateY(-2px);
+          transition:.3s;
+        }
 
-              transform:translateX(-100%);
 
-            }
+        @media(max-width:800px){
 
+          div[style*="display:flex"]{
+            flex-direction:column;
           }
 
 
-          @keyframes goldMove {
-
-            0% {
-
-              transform:translateX(-100%);
-
-            }
-
-            100% {
-
-              transform:translateX(100%);
-
-            }
-
+          h1{
+            font-size:32px !important;
           }
+
+
+        }
+
 
         `}
 
       </style>
 
 
-    </>
+    </div>
 
   );
 
