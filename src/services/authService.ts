@@ -1,34 +1,23 @@
-import{
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  onAuthStateChanged,
+  sendEmailVerification
+} from "firebase/auth";
 
-createUserWithEmailAndPassword,
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp
+} from "firebase/firestore";
 
-signInWithEmailAndPassword,
-
-signOut,
-
-updateProfile,
-
-onAuthStateChanged
-
-}from"firebase/auth";
-
-import{
-
-doc,
-
-setDoc,
-
-serverTimestamp
-
-}from"firebase/firestore";
-
-import{
-
-auth,
-
-db
-
-}from"../firebase/config";
+import {
+  auth,
+  db
+} from "../firebase/config";
 
 export async function registerUser(
 
