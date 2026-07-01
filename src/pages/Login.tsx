@@ -5,7 +5,7 @@ import { loginUser } from "../services/authService";
 
 type LoginType = "owner" | "admin";
 
-export default function Login(): JSX.Element {
+export default function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
