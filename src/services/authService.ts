@@ -20,101 +20,82 @@ import {
 } from "../firebase/config";
 
 export async function registerUser(
+  name: string,
+  email: string,
+  password: string
+) {
 
-name:string,
+  const result =
+    await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-email:string,
+  await updateProfile(result.user, {
+    displayName: name
+  });
 
-password:string
+  await setDoc(
+    doc(db, "users", result.user.uid),
+    {
+      uid: result.user.uid,
+      name,
+      email,
+      role: "user",
+      createdAt: serverTimestamp()
+    }
+  );
 
-){
+  // إرسال رسالة تفعيل البريد الإلكتروني
+  await sendEmailVerification(result.user);
 
-const result=
-
-await createUserWithEmailAndPassword(
-
-auth,
-
-email,
-
-password
-
-);
-
-await updateProfile(
-
-result.user,
-
-{
-
-displayName:name
-
-}
-
-);
-
-await setDoc(
-
-doc(db,"users",result.user.uid),
-
-{
-
-uid:result.user.uid,
-
-name,
-
-email,
-
-createdAt:serverTimestamp(),
-
-role:"user"
-
-}
-
-);
-
-return result.user;
+  return result.user;
 
 }
 
 export async function loginUser(
+  email: string,
+  password: string
+) {
 
-email:string,
+  const result =
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-password:string
-
-){
-
-const result=
-
-await signInWithEmailAndPassword(
-
-auth,
-
-email,
-
-password
-
-);
-
-return result.user;
+  return result.user;
 
 }
 
-export async function logoutUser(){
+export async function logoutUser() {
 
-await signOut(auth);
+  await signOut(auth);
 
 }
 
-export function authListener(callback:any){
+export function authListener(callback: any) {
 
-return onAuthStateChanged(
+  return onAuthStateChanged(
+    auth,
+    callback
+  );
 
-auth,
+}
 
-callback
+// جلب صلاحية المستخدم (owner / admin / user)
+export async function getUserRole(uid: string) {
 
-);
+  const snap = await getDoc(
+    doc(db, "users", uid)
+  );
+
+  if (!snap.exists()) {
+    return null;
+  }
+
+  return snap.data().role;
 
 }
