@@ -294,4 +294,5 @@ export default function Login(): JSX.Element {
                 </button>
                 <button
                   type="button"
-                  className={`${styles.btn} ${styles.btnGhost}`}...
+                  className={`${styles.btn} ${styles.btnGhost}`}
+
