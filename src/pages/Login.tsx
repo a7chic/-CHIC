@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./Login.module.css";
 import ThroneSVG from "./ThroneSVG";
 import ShieldSVG from "./ShieldSVG";
-import { auth } from "../firebase/config"; // حافظت على نفس المسار كما طلبت
+import OwnerMarquee from "./OwnerMarquee";
+import { auth } from "../firebase/config"; // بالضبط كما طلبت
 import { signInWithPhoneNumber, RecaptchaVerifier, ConfirmationResult } from "firebase/auth";
-import { loginUser } from "../services/authService"; // استخدمنا خدمة تسجيل الدخول الموجودة في المشروع
+import { loginUser } from "../services/authService"; // بالضبط كما طلبت
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
@@ -13,7 +14,7 @@ type AuthError = { code?: string; message?: string };
 
 export default function Login(): JSX.Element {
   const navigate = useNavigate();
-  const { user, refreshUser } = useAuth(); // استخدم الـ hook الموجود لمزامنة الحالة (إن كان متاحًا)
+  const { refreshUser } = useAuth?.() ?? {}; // بعض المشاريع قد لا تعيد refreshUser؛ استخدم optional chaining
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -23,12 +24,25 @@ export default function Login(): JSX.Element {
   const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<"owner" | "moderator" | null>(null);
+  const [showMarquee, setShowMarquee] = useState(false);
+  const marqueeTimerRef = useRef<number | null>(null);
 
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Cleanup recaptcha on unmount to avoid duplication in SPA navigation
+    // create audio element once (public path)
+    try {
+      audioRef.current = new Audio("/sounds/owner-login-alert.mp3");
+      // keep muted by default until played by user gesture; we'll call play() only after successful login
+    } catch {
+      audioRef.current = null;
+    }
+
     return () => {
+      if (marqueeTimerRef.current) {
+        window.clearTimeout(marqueeTimerRef.current);
+      }
       try {
         if ((window as any).recaptchaVerifierInstance) {
           (window as any).recaptchaVerifierInstance.clear?.();
@@ -66,7 +80,7 @@ export default function Login(): JSX.Element {
       setLoading(false);
       return;
     }
-    // basic email validation
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanedEmail)) {
       setError("الرجاء إدخال بريد إلكتروني صالح.");
@@ -75,17 +89,30 @@ export default function Login(): JSX.Element {
     }
 
     try {
-      // استخدمنا loginUser من services/authService كما طلبت
-      // loginUser يُفترض أنه يعيد Promise<void> أو يرمز لنجاح/فشل تسجيل الدخول
+      // استخدم loginUser من services/authService كما طلبت
       await loginUser(cleanedEmail, password);
 
-      // تحديث حالة المستخدم إن كان الـ hook يدعم ذلك
+      // Refresh user state if hook provides such fn
       try { await refreshUser?.(); } catch { /* ignore */ }
 
-      // بعد الدخول نوجّه بناءً على الدور المحدد أو إلى الصفحة الرئيسية
-      if (selectedRole === "owner") navigate("/admin");
-      else if (selectedRole === "moderator") navigate("/moderator");
-      else navigate("/");
+      // إذا الدور المحدد owner، نفّذ مؤثرات إضافية
+      if (selectedRole === "owner") {
+        // play audio safely
+        try {
+          await audioRef.current?.play().catch(() => { /* swallow */ });
+        } catch {
+          // swallow any playback exception
+        }
+        // show marquee for 20 seconds
+        setShowMarquee(true);
+        if (marqueeTimerRef.current) window.clearTimeout(marqueeTimerRef.current);
+        marqueeTimerRef.current = window.setTimeout(() => setShowMarquee(false), 20000);
+        navigate("/admin"); // حافظنا على التوجيه كما سبق
+      } else if (selectedRole === "moderator") {
+        navigate("/moderator");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       setError(prettyError(err));
     } finally {
@@ -153,6 +180,13 @@ export default function Login(): JSX.Element {
       }
       await confirmation.confirm(otp);
       try { await refreshUser?.(); } catch { /* ignore */ }
+      // If owner role selected, show audio & marquee as well
+      if (selectedRole === "owner") {
+        try { await audioRef.current?.play().catch(() => {}); } catch {}
+        setShowMarquee(true);
+        if (marqueeTimerRef.current) window.clearTimeout(marqueeTimerRef.current);
+        marqueeTimerRef.current = window.setTimeout(() => setShowMarquee(false), 20000);
+      }
       navigate("/");
     } catch (err: any) {
       setError(prettyError(err));
@@ -163,13 +197,16 @@ export default function Login(): JSX.Element {
 
   function selectRole(role: "owner" | "moderator") {
     setSelectedRole(role);
-    // Scroll login card into view (helpful on mobile)
+    // scroll login into view for mobile
     const form = document.querySelector(`.${styles.cardLogin}`) as HTMLElement | null;
     form?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   return (
     <div className={styles.page}>
+      {/* Marquee (appears on owner login) */}
+      <OwnerMarquee visible={showMarquee} onClose={() => setShowMarquee(false)} />
+
       <header className={styles.header}>
         <div className={styles.brand}>
           <div className={styles.crown} aria-hidden />
@@ -180,7 +217,6 @@ export default function Login(): JSX.Element {
 
       <main className={styles.container} role="main" aria-labelledby="login-heading">
         <div className={styles.grid}>
-          {/* Owner Card */}
           <section className={styles.cardOwner} aria-label="صاحب الموقع">
             <div className={styles.ownerInner}>
               <div className={styles.ownerFrame}>
@@ -199,7 +235,6 @@ export default function Login(): JSX.Element {
             </div>
           </section>
 
-          {/* Moderator Card */}
           <aside className={styles.cardModerator} aria-label="المشرفين">
             <div className={styles.modInner}>
               <div className={styles.shield}><ShieldSVG /></div>
@@ -216,7 +251,6 @@ export default function Login(): JSX.Element {
             </div>
           </aside>
 
-          {/* Login Card */}
           <form className={styles.cardLogin} onSubmit={handleEmailLogin} noValidate aria-live="polite">
             <div className={styles.loginInner}>
               <h2 id="login-heading" className={styles.loginTitle}>تسجيل الدخول</h2>
