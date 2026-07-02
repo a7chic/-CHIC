@@ -289,22 +289,22 @@ export default function Login(): JSX.Element {
   />
 </label>
 
-<div className={styles.actionsRow}>
-      <button type="submit" className={styles.btn}>
-        {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-      </button>
-
-      <button
-        type="button"
-        className={`${styles.btn} ${styles.btnGhost}`}
-      >
-        إلغاء
-      </button>
-    </form>
-  </div>
-</main>
-
-<div ref={recaptchaRef} />
-</div>
-);
-}
+    <div className={styles.actionsRow}>
+          <button type="submit" className={styles.btn}>
+            {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+          </button>
+    
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnGhost}`}
+          >
+            إلغاء
+          </button>
+        </form>
+      </div>
+    </main>
+    
+    <div ref={recaptchaRef} />
+    </div>
+    );
+    }
