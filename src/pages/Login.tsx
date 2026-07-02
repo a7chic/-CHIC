@@ -1,616 +1,337 @@
-import { useState } from "react";
+// src/pages/Login.tsx
+import React, { useEffect, useRef, useState } from "react";
+import styles from "./Login.module.css";
+import ThroneSVG from "./ThroneSVG";
+import ShieldSVG from "./ShieldSVG";
+import { auth } from "../firebase/config"; // حافظت على نفس المسار كما طلبت
+import { signInWithPhoneNumber, RecaptchaVerifier, ConfirmationResult } from "firebase/auth";
+import { loginUser } from "../services/authService"; // استخدمنا خدمة تسجيل الدخول الموجودة في المشروع
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase/config";
-import { loginUser } from "../services/authService";
+import useAuth from "../hooks/useAuth";
 
-type LoginType = "owner" | "admin";
+type AuthError = { code?: string; message?: string };
 
-export default function Login() {
+export default function Login(): JSX.Element {
   const navigate = useNavigate();
-
+  const { user, refreshUser } = useAuth(); // استخدم الـ hook الموجود لمزامنة الحالة (إن كان متاحًا)
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const [loginType, setLoginType] = useState<LoginType>("owner");
-
-  const [showOtp, setShowOtp] = useState(false);
+  const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<"owner" | "moderator" | null>(null);
 
-  const [ownerMessage, setOwnerMessage] = useState(false);
+  const recaptchaRef = useRef<HTMLDivElement | null>(null);
 
-  const ownerMarquee =
-    'تم تسجيل دخول صاحب موقع "أناقة CHIC" 👑 نرحب بكم ونتمنى لكم تجربة راقية وآمنة. ' +
-    "للاقتراحات والشكاوى يرجى التواصل مع إدارة الموقع مباشرة حفاظًا على حقوق الجميع.";
+  useEffect(() => {
+    // Cleanup recaptcha on unmount to avoid duplication in SPA navigation
+    return () => {
+      try {
+        if ((window as any).recaptchaVerifierInstance) {
+          (window as any).recaptchaVerifierInstance.clear?.();
+          delete (window as any).recaptchaVerifierInstance;
+        }
+      } catch {
+        // ignore
+      }
+    };
+  }, []);
 
-  const login = async () => {
-    if (!email || !password) {
-      alert("أدخل البريد وكلمة المرور");
+  function sanitize(value: string) {
+    return value.trim();
+  }
+
+  function prettyError(err: AuthError) {
+    if (!err || !err.code) return "حدث خطأ أثناء محاولة تسجيل الدخول. الرجاء المحاولة لاحقاً.";
+    const c = err.code;
+    if (c.includes("auth/wrong-password") || c.includes("auth/user-not-found")) return "البريد أو كلمة المرور غير صحيحتين.";
+    if (c.includes("auth/too-many-requests")) return "محاولات كثيرة. حاول لاحقًا.";
+    if (c.includes("auth/invalid-email")) return "الرجاء إدخال بريد إلكتروني صالح.";
+    if (c.includes("auth/invalid-verification-code") || c.includes("auth/invalid-verification-id")) return "رمز التحقق غير صحيح.";
+    return "تعذر تسجيل الدخول. الرجاء المحاولة مرة أخرى.";
+  }
+
+  async function handleEmailLogin(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (loading) return;
+    setError(null);
+    setLoading(true);
+
+    const cleanedEmail = sanitize(email);
+    if (!cleanedEmail || !password) {
+      setError("الرجاء ملء البريد الإلكتروني وكلمة المرور.");
+      setLoading(false);
+      return;
+    }
+    // basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanedEmail)) {
+      setError("الرجاء إدخال بريد إلكتروني صالح.");
+      setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      // استخدمنا loginUser من services/authService كما طلبت
+      // loginUser يُفترض أنه يعيد Promise<void> أو يرمز لنجاح/فشل تسجيل الدخول
+      await loginUser(cleanedEmail, password);
 
-      await loginUser(email.trim(), password);
+      // تحديث حالة المستخدم إن كان الـ hook يدعم ذلك
+      try { await refreshUser?.(); } catch { /* ignore */ }
 
-      if (!auth.currentUser?.emailVerified) {
-        alert("يرجى تفعيل البريد الإلكتروني");
-        return;
-      }
-
-      const code = Math.floor(
-        100000 + Math.random() * 900000
-      ).toString();
-
-      setGeneratedOtp(code);
-
-      alert("رمز التحقق: " + code);
-
-      setShowOtp(true);
-
-    } catch {
-      alert("بيانات الدخول غير صحيحة");
+      // بعد الدخول نوجّه بناءً على الدور المحدد أو إلى الصفحة الرئيسية
+      if (selectedRole === "owner") navigate("/admin");
+      else if (selectedRole === "moderator") navigate("/moderator");
+      else navigate("/");
+    } catch (err: any) {
+      setError(prettyError(err));
     } finally {
       setLoading(false);
     }
-  };
+  }
 
+  async function ensureRecaptcha() {
+    if (!recaptchaRef.current) return null;
+    if ((window as any).recaptchaVerifierInstance) return (window as any).recaptchaVerifierInstance;
+    try {
+      const verifier = new RecaptchaVerifier(
+        recaptchaRef.current,
+        { size: "invisible" },
+        auth
+      );
+      (window as any).recaptchaVerifierInstance = verifier;
+      return verifier;
+    } catch (err) {
+      console.warn("reCAPTCHA init failed", err);
+      return null;
+    }
+  }
 
-  const verifyOtp = () => {
+  async function handleSendOtp(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (loading) return;
+    setError(null);
+    setLoading(true);
 
-    if (otp !== generatedOtp) {
-      alert("رمز التحقق غير صحيح");
+    const phoneClean = sanitize(phone);
+    if (!phoneClean) {
+      setError("الرجاء إدخال رقم الجوال لإرسال رمز التحقق.");
+      setLoading(false);
       return;
     }
 
-
-    if (loginType === "owner") {
-
-      const sound = new Audio(
-        "/sounds/owner-login-alert.mp3"
-      );
-
-      sound.volume = 0.8;
-      sound.play().catch(()=>{});
-
-
-      setOwnerMessage(true);
-
-      setTimeout(()=>{
-        setOwnerMessage(false);
-      },20000);
-
-
-      navigate("/admin");
-
-    } else {
-
-      navigate("/admin");
-
+    try {
+      const verifier = await ensureRecaptcha();
+      if (!verifier) {
+        setError("لا يمكن تهيئة reCAPTCHA. تحقق من إعدادات Firebase.");
+        setLoading(false);
+        return;
+      }
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneClean, verifier);
+      setConfirmation(confirmationResult);
+      setOtpSent(true);
+    } catch (err: any) {
+      setError(prettyError(err));
+    } finally {
+      setLoading(false);
     }
+  }
 
-  };
+  async function handleConfirmOtp(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (loading) return;
+    setError(null);
+    setLoading(true);
+    try {
+      if (!confirmation) {
+        setError("لم يتم إرسال رمز التحقق بعد.");
+        setLoading(false);
+        return;
+      }
+      await confirmation.confirm(otp);
+      try { await refreshUser?.(); } catch { /* ignore */ }
+      navigate("/");
+    } catch (err: any) {
+      setError(prettyError(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  function selectRole(role: "owner" | "moderator") {
+    setSelectedRole(role);
+    // Scroll login card into view (helpful on mobile)
+    const form = document.querySelector(`.${styles.cardLogin}`) as HTMLElement | null;
+    form?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 
   return (
-    <div
-      style={{
-        minHeight:"100vh",
-        background:"#030303",
-        color:"#fff",
-        direction:"rtl",
-        display:"flex",
-        justifyContent:"center",
-        alignItems:"center",
-        padding:"20px",
-        fontFamily:
-        "Cairo, system-ui, sans-serif"
-      }}
-    >
-      {ownerMessage && (
-        <div
-          style={{
-            position:"fixed",
-            top:0,
-            right:0,
-            left:0,
-            zIndex:9999,
-            background:
-            "linear-gradient(90deg,#8b6508,#f5c84c,#8b6508)",
-            color:"#000",
-            padding:"12px",
-            overflow:"hidden",
-            fontWeight:"bold"
-          }}
-        >
-
-          <div
-            style={{
-              whiteSpace:"nowrap",
-              animation:
-              "ownerMove 20s linear infinite"
-            }}
-          >
-            {ownerMarquee}
-          </div>
-
-          <style>
-            {`
-              @keyframes ownerMove {
-                from {
-                  transform:translateX(100%);
-                }
-                to {
-                  transform:translateX(-100%);
-                }
-              }
-            `}
-          </style>
-
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <div className={styles.brand}>
+          <div className={styles.crown} aria-hidden />
+          <h1 className={styles.siteTitle}>ANAQA CHIC</h1>
+          <p className={styles.tagline}>أناقة تفوق الخيال</p>
         </div>
-      )}
+      </header>
 
+      <main className={styles.container} role="main" aria-labelledby="login-heading">
+        <div className={styles.grid}>
+          {/* Owner Card */}
+          <section className={styles.cardOwner} aria-label="صاحب الموقع">
+            <div className={styles.ownerInner}>
+              <div className={styles.ownerFrame}>
+                <div className={styles.throne}><ThroneSVG /></div>
+                <h2 className={styles.ownerTitle}>صاحب موقع &quot;ANAQA CHIC&quot;</h2>
+                <p className={styles.ownerDesc}>الإدارة العليا والتحكم الكامل بصلاحيات الموقع.</p>
+                <button
+                  className={`${styles.btn} ${styles.btnGold} ${styles.btnHero}`}
+                  onClick={() => selectRole("owner")}
+                  disabled={loading}
+                  aria-pressed={selectedRole === "owner"}
+                >
+                  دخول الإدارة العليا
+                </button>
+              </div>
+            </div>
+          </section>
 
-      <div
-        style={{
-          width:"100%",
-          maxWidth:"950px",
-          background:
-          "linear-gradient(145deg,#111,#020202)",
-          border:"1px solid #b88920",
-          borderRadius:"30px",
-          padding:"35px",
-          boxShadow:
-          "0 0 60px rgba(212,175,55,.25)"
-        }}
-      >
+          {/* Moderator Card */}
+          <aside className={styles.cardModerator} aria-label="المشرفين">
+            <div className={styles.modInner}>
+              <div className={styles.shield}><ShieldSVG /></div>
+              <h3 className={styles.modTitle}>المشرفين والمراقبين</h3>
+              <p className={styles.modDesc}>متابعة وإدارة أقسام الموقع حسب الصلاحيات.</p>
+              <button
+                className={`${styles.btn} ${styles.btnGold}`}
+                onClick={() => selectRole("moderator")}
+                disabled={loading}
+                aria-pressed={selectedRole === "moderator"}
+              >
+                دخول المشرفين والمراقبين
+              </button>
+            </div>
+          </aside>
 
+          {/* Login Card */}
+          <form className={styles.cardLogin} onSubmit={handleEmailLogin} noValidate aria-live="polite">
+            <div className={styles.loginInner}>
+              <h2 id="login-heading" className={styles.loginTitle}>تسجيل الدخول</h2>
 
-        <div
-          style={{
-            textAlign:"center",
-            marginBottom:"35px"
-          }}
-        >
+              {selectedRole && <div className={styles.roleBadge}>{selectedRole === "owner" ? "الإدارة العليا" : "المشرف"}</div>}
 
-          <div
-            style={{
-              fontSize:"55px"
-            }}
-          >
-            👑
-          </div>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>البريد الإلكتروني</span>
+                <input
+                  id="email"
+                  className={styles.input}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@domain.com"
+                  autoComplete="email"
+                  disabled={loading}
+                  aria-required
+                />
+              </label>
 
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>كلمة المرور</span>
+                <input
+                  id="password"
+                  className={styles.input}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  disabled={loading}
+                  aria-required
+                />
+              </label>
 
-          <h1
-            style={{
-              color:"#d4af37",
-              fontSize:"45px",
-              letterSpacing:"3px",
-              margin:0
-            }}
-          >
-            AN AQA CHIC
-          </h1>
+              <div className={styles.actionsRow}>
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={loading}>
+                  {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnGhost}`}
+                  onClick={() => { setEmail(""); setPassword(""); setError(null); }}
+                  disabled={loading}
+                >
+                  مسح
+                </button>
+              </div>
 
+              <div className={styles.orDivider}><span>أو</span></div>
 
-          <p
-            style={{
-              color:"#d4af37",
-              fontSize:"18px"
-            }}
-          >
-            أناقة تفوق الخيال
-          </p>
+              <div className={styles.otpBlock}>
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>رقم الجوال (لـ OTP)</span>
+                  <input
+                    className={styles.input}
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+201XXXXXXXXX"
+                    disabled={loading || otpSent}
+                  />
+                </label>
 
+                {!otpSent ? (
+                  <button type="button" className={`${styles.btn} ${styles.btnGold}`} onClick={handleSendOtp} disabled={loading}>
+                    إرسال رمز التحقق (OTP)
+                  </button>
+                ) : (
+                  <>
+                    <label className={styles.field}>
+                      <span className={styles.fieldLabel}>أدخل رمز OTP</span>
+                      <input
+                        className={styles.input}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="رمز التحقق"
+                        disabled={loading}
+                      />
+                    </label>
+
+                    <div className={styles.actionsRow}>
+                      <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleConfirmOtp} disabled={loading}>
+                        تأكيد OTP
+                      </button>
+                      <button type="button" className={`${styles.btn} ${styles.btnGhost}`} onClick={() => { setOtp(""); setOtpSent(false); setConfirmation(null); setError(null); }} disabled={loading}>
+                        تغيير/إعادة الرقم
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <div ref={recaptchaRef} id="recaptcha-container" />
+              </div>
+
+              <div className={styles.formFooter}>
+                <button type="button" className={styles.linkBtn} onClick={() => navigate("/register")} disabled={loading}>
+                  إنشاء حساب
+                </button>
+                <button type="button" className={styles.linkBtn} onClick={() => window.history.back()} disabled={loading}>
+                  العودة
+                </button>
+              </div>
+
+              {error && <div role="alert" className={styles.error}>{error}</div>}
+            </div>
+          </form>
         </div>
-
-
-
-        <div
-          style={{
-            display:"flex",
-            gap:"25px",
-            alignItems:"stretch",
-            justifyContent:"center"
-          }}
-        >
-        {/* صاحب الموقع - الجانب الأيمن */}
-
-        <div
-          style={{
-            flex:1.4,
-            minHeight:"430px",
-            background:
-            "linear-gradient(160deg,#111,#050505)",
-            border:"2px solid #d4af37",
-            borderRadius:"25px",
-            padding:"25px",
-            textAlign:"center",
-            display:"flex",
-            flexDirection:"column",
-            justifyContent:"center",
-            boxShadow:
-            "0 0 35px rgba(212,175,55,.25)"
-          }}
-        >
-
-          <div
-            style={{
-              fontSize:"90px",
-              marginBottom:"15px"
-            }}
-          >
-            👑🪑
-          </div>
-
-
-          <h2
-            style={{
-              color:"#d4af37",
-              fontSize:"32px",
-              margin:"10px 0"
-            }}
-          >
-            صاحب موقع
-            <br/>
-            "أناقة CHIC"
-          </h2>
-
-
-          <p
-            style={{
-              color:"#ddd",
-              fontSize:"18px",
-              lineHeight:1.8
-            }}
-          >
-            الإدارة العليا والتحكم الكامل
-            <br/>
-            بصلاحيات الموقع
-          </p>
-
-
-          <button
-            type="button"
-            onClick={()=>{
-              setLoginType("owner");
-            }}
-            style={{
-              marginTop:"25px",
-              padding:"16px",
-              borderRadius:"15px",
-              border:"none",
-              background:
-              "linear-gradient(90deg,#b88619,#f4d06f)",
-              fontSize:"20px",
-              fontWeight:"bold",
-              cursor:"pointer"
-            }}
-          >
-            👑 دخول الإدارة العليا
-          </button>
-
-
-        </div>
-
-
-
-        {/* المشرفين والمراقبين - الجانب الأيسر */}
-
-        <div
-          style={{
-            flex:0.8,
-            minHeight:"330px",
-            background:
-            "linear-gradient(160deg,#111,#050505)",
-            border:"1px solid #d4af37",
-            borderRadius:"25px",
-            padding:"25px",
-            textAlign:"center",
-            display:"flex",
-            flexDirection:"column",
-            justifyContent:"center"
-          }}
-        >
-
-
-          <div
-            style={{
-              fontSize:"55px"
-            }}
-          >
-            🛡️
-          </div>
-
-
-          <h2
-            style={{
-              color:"#d4af37",
-              fontSize:"25px"
-            }}
-          >
-            المشرفين
-            <br/>
-            والمراقبين
-          </h2>
-
-
-          <p
-            style={{
-              color:"#ccc",
-              lineHeight:1.7
-            }}
-          >
-            متابعة وإدارة أقسام الموقع
-            <br/>
-            حسب الصلاحيات
-          </p>
-
-
-          <button
-            type="button"
-            onClick={()=>{
-              setLoginType("admin");
-            }}
-            style={{
-              marginTop:"20px",
-              padding:"14px",
-              borderRadius:"14px",
-              border:"none",
-              background:
-              "linear-gradient(90deg,#b88619,#f4d06f)",
-              fontWeight:"bold",
-              cursor:"pointer"
-            }}
-          >
-            🛡️ دخول المشرفين
-          </button>
-
-
-        </div>
-
-
-      </div>
-        {/* نموذج تسجيل الدخول */}
-
-        <div
-          style={{
-            marginTop:"35px",
-            background:
-            "linear-gradient(160deg,#0d0d0d,#030303)",
-            border:"1px solid #8b6508",
-            borderRadius:"25px",
-            padding:"30px",
-          }}
-        >
-
-          <h2
-            style={{
-              textAlign:"center",
-              color:"#d4af37",
-              fontSize:"30px",
-              marginBottom:"25px"
-            }}
-          >
-            ✦ تسجيل الدخول ✦
-          </h2>
-
-
-
-          {!showOtp ? (
-
-          <>
-
-          <input
-            type="email"
-            placeholder="البريد الإلكتروني"
-            value={email}
-            onChange={(e)=>setEmail(e.target.value)}
-            style={{
-              width:"100%",
-              boxSizing:"border-box",
-              padding:"17px",
-              marginBottom:"15px",
-              borderRadius:"15px",
-              background:"#111",
-              color:"#fff",
-              border:"1px solid #8b6508",
-              fontSize:"17px",
-              textAlign:"right"
-            }}
-          />
-
-
-          <input
-            type="password"
-            placeholder="كلمة المرور"
-            value={password}
-            onChange={(e)=>setPassword(e.target.value)}
-            style={{
-              width:"100%",
-              boxSizing:"border-box",
-              padding:"17px",
-              marginBottom:"15px",
-              borderRadius:"15px",
-              background:"#111",
-              color:"#fff",
-              border:"1px solid #8b6508",
-              fontSize:"17px",
-              textAlign:"right"
-            }}
-          />
-
-
-          </>
-
-          ) : (
-
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="أدخل رمز التحقق OTP"
-            value={otp}
-            onChange={(e)=>setOtp(e.target.value)}
-            style={{
-              width:"100%",
-              boxSizing:"border-box",
-              padding:"17px",
-              borderRadius:"15px",
-              background:"#111",
-              color:"#fff",
-              border:"1px solid #8b6508",
-              fontSize:"18px",
-              textAlign:"center"
-            }}
-          />
-
-          )}
-
-
-
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={
-              showOtp ? verifyOtp : login
-            }
-            style={{
-              width:"100%",
-              marginTop:"25px",
-              padding:"18px",
-              borderRadius:"18px",
-              border:"none",
-              cursor:"pointer",
-              background:
-              "linear-gradient(90deg,#b88619,#f4d06f)",
-              color:"#000",
-              fontSize:"22px",
-              fontWeight:"bold",
-              boxShadow:
-              "0 0 25px rgba(212,175,55,.35)"
-            }}
-          >
-
-          {loading
-          ?
-          "جاري التحقق..."
-          :
-          showOtp
-          ?
-          "تأكيد الرمز ودخول أناقة CHIC"
-          :
-          "🔒 دخول الآن"}
-
-          </button>
-
-
-
-          <div
-            style={{
-              display:"flex",
-              justifyContent:"space-between",
-              marginTop:"25px",
-              color:"#d4af37",
-              fontSize:"18px"
-            }}
-          >
-
-            <span
-              style={{
-                cursor:"pointer"
-              }}
-            >
-              إنشاء حساب جديد
-            </span>
-
-
-            <span
-              style={{
-                cursor:"pointer"
-              }}
-            >
-              العودة
-            </span>
-
-
-          </div>
-
-
-        </div>
-        </div>
-
-
-        <div
-          style={{
-            textAlign:"center",
-            marginTop:"35px",
-            color:"#777",
-            fontSize:"14px"
-          }}
-        >
-          <div
-            style={{
-              color:"#d4af37",
-              fontSize:"22px",
-              marginBottom:"8px"
-            }}
-          >
-            👑 ANAQA CHIC
-          </div>
-
-          جميع الحقوق محفوظة ©
-        </div>
-
-
-      </div>
-
-
-
-      <style>
-        {`
-
-        *{
-          box-sizing:border-box;
-        }
-
-
-        input::placeholder{
-          color:#888;
-        }
-
-
-        button:hover{
-          transform:translateY(-2px);
-          transition:.3s;
-        }
-
-
-        @media(max-width:800px){
-
-          div[style*="display:flex"]{
-            flex-direction:column;
-          }
-
-
-          h1{
-            font-size:32px !important;
-          }
-
-
-        }
-
-
-        `}
-
-      </style>
-
-
+      </main>
+
+      <footer className={styles.footer}>
+        <div className={styles.notice}>بعد إدخال بيانات الدخول سيتم إرسال رمز تحقق (OTP) إلى بريدك الإلكتروني أو جوالك للتحقق من هويتك.</div>
+        <div className={styles.copy}>© ANAQA CHIC جميع الحقوق محفوظة</div>
+      </footer>
     </div>
-
   );
-
 }
