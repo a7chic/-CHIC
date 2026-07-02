@@ -294,19 +294,17 @@ export default function Login(): JSX.Element {
     {loading ? "جاري الدخول..." : "تسجيل الدخول"}
   </button>
 
-  <button
-    type="button"
-    className={`${styles.btn} ${styles.btnGhost}`}
-  >
-    إلغاء
-  </button>
-          </div>
+            <button
+            type="button"
+            className={`${styles.btn} ${styles.btnGhost}`}
+          >
+            إلغاء
+          </button>
         </form>
       </div>
     </main>
 
     <div ref={recaptchaRef} />
-
   </div>
 );
 }
