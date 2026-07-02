@@ -292,9 +292,8 @@ export default function Login(): JSX.Element {
             {loading ? "جاري الدخول..." : "تسجيل الدخول"}
           </button>
           <button
-            type="button"
-            className={`${styles.btn} ${styles.btnGhost}`}
-          >
-            إلغاء
-          </button>
-        </div>
+  type="button"
+  className={`${styles.btn} ${styles.btnGhost}`}
+>
+  إلغاء
+</button>
