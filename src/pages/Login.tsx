@@ -286,13 +286,17 @@ export default function Login(): JSX.Element {
                   disabled={loading}
                   aria-required
                 />
-              </label>
+                        </label>
+        </div>
 
-              <div className={styles.actionsRow}>
-                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={loading}>
-                  {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.btn} ${styles.btnGhost}`}
-
+        <div className={styles.actionsRow}>
+          <button type="submit" className={styles.btn}>
+            {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+          </button>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnGhost}`}
+          >
+            إلغاء
+          </button>
+        </div>
