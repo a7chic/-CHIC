@@ -286,10 +286,8 @@ export default function Login(): JSX.Element {
                   disabled={loading}
                   aria-required
                 />
-                        </label>
-        </div>
-
-        <div className={styles.actionsRow}>
+                </label>
+                <div className={styles.actionsRow}>
           <button type="submit" className={styles.btn}>
             {loading ? "جاري الدخول..." : "تسجيل الدخول"}
           </button>
