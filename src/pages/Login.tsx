@@ -3,9 +3,11 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./Login.module.css";
 import ThroneSVG from "./ThroneSVG";
 import ShieldSVG from "./ShieldSVG";
+import OwnerMarquee from "./OwnerMarquee";
 import { auth } from "../firebase/config"; // بالضبط كما طلبت
 import { signInWithPhoneNumber, RecaptchaVerifier, ConfirmationResult } from "firebase/auth";
 import { loginUser } from "../services/authService"; // بالضبط كما طلبت
+import { broadcastOwnerLogin } from "../services/siteService";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
@@ -13,7 +15,7 @@ type AuthError = { code?: string; message?: string };
 
 export default function Login(): JSX.Element {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth?.() ?? {};
+  const { refreshUser } = useAuth?.() ?? {}; // بعض المشاريع قد لا تعيد refreshUser؛ استخدم optional chaining
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -27,8 +29,17 @@ export default function Login(): JSX.Element {
   const marqueeTimerRef = useRef<number | null>(null);
 
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // create audio element once (public path)
+    try {
+      audioRef.current = new Audio("/sounds/owner-login-alert.mp3");
+      // keep muted by default until played by user gesture; we'll call play() only after successful login
+    } catch {
+      audioRef.current = null;
+    }
+
     return () => {
       if (marqueeTimerRef.current) {
         window.clearTimeout(marqueeTimerRef.current);
@@ -79,32 +90,25 @@ export default function Login(): JSX.Element {
     }
 
     try {
+      // استخدم loginUser من services/authService كما طلبت
       await loginUser(cleanedEmail, password);
 
+      // Refresh user state if hook provides such fn
       try { await refreshUser?.(); } catch { /* ignore */ }
 
+      // إذا الدور المحدد owner، نفّذ مؤثرات إضافية
       if (selectedRole === "owner") {
-        // تشغيل الصوت بالصيغة المطلوبة بالضبط
+        // broadcast owner login so all clients can react
         try {
-          const sound = new Audio("/sounds/owner-login-alert.mp3");
-          sound.volume = 0.8;
-          sound.play().catch(() => {});
+          await broadcastOwnerLogin(auth.currentUser?.uid ?? null);
         } catch {
-          // swallow
+          // ignore
         }
-        // تسجيل الحدث في localStorage وبثه للتبويبات المفتوحة
-        try {
-          localStorage.setItem("owner-login-announcement", String(Date.now()));
-        } catch {}
-        try {
-          if (typeof (window as any).BroadcastChannel !== "undefined") {
-            try { new (window as any).BroadcastChannel("owner-login").postMessage({ ts: Date.now() }); } catch {}
-          }
-        } catch {}
+        // show marquee for 20 seconds locally as well
         setShowMarquee(true);
         if (marqueeTimerRef.current) window.clearTimeout(marqueeTimerRef.current);
         marqueeTimerRef.current = window.setTimeout(() => setShowMarquee(false), 20000);
-        navigate("/admin");
+        navigate("/admin"); // حافظنا على التوجيه كما سبق
       } else if (selectedRole === "moderator") {
         navigate("/moderator");
       } else {
@@ -177,21 +181,9 @@ export default function Login(): JSX.Element {
       }
       await confirmation.confirm(otp);
       try { await refreshUser?.(); } catch { /* ignore */ }
-      // إذا الدور owner، نفّذ الصوت والشريط كما طلبت
+      // If owner role selected, broadcast the owner-login event
       if (selectedRole === "owner") {
-        try {
-          const sound = new Audio("/sounds/owner-login-alert.mp3");
-          sound.volume = 0.8;
-          sound.play().catch(() => {});
-        } catch {}
-        try {
-          localStorage.setItem("owner-login-announcement", String(Date.now()));
-        } catch {}
-        try {
-          if (typeof (window as any).BroadcastChannel !== "undefined") {
-            try { new (window as any).BroadcastChannel("owner-login").postMessage({ ts: Date.now() }); } catch {}
-          }
-        } catch {}
+        try { await broadcastOwnerLogin(auth.currentUser?.uid ?? null); } catch {}
         setShowMarquee(true);
         if (marqueeTimerRef.current) window.clearTimeout(marqueeTimerRef.current);
         marqueeTimerRef.current = window.setTimeout(() => setShowMarquee(false), 20000);
@@ -206,12 +198,16 @@ export default function Login(): JSX.Element {
 
   function selectRole(role: "owner" | "moderator") {
     setSelectedRole(role);
+    // scroll login into view for mobile
     const form = document.querySelector(`.${styles.cardLogin}`) as HTMLElement | null;
     form?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   return (
     <div className={styles.page}>
+      {/* Marquee (appears on owner login) */}
+      <OwnerMarquee visible={showMarquee} onClose={() => setShowMarquee(false)} />
+
       <header className={styles.header}>
         <div className={styles.brand}>
           <div className={styles.crown} aria-hidden />
@@ -298,79 +294,4 @@ export default function Login(): JSX.Element {
                 </button>
                 <button
                   type="button"
-                  className={`${styles.btn} ${styles.btnGhost}`}
-                  onClick={() => { setEmail(""); setPassword(""); setError(null); }}
-                  disabled={loading}
-                >
-                  مسح
-                </button>
-              </div>
-
-              <div className={styles.orDivider}><span>أو</span></div>
-
-              <div className={styles.otpBlock}>
-                <label className={styles.field}>
-                  <span className={styles.fieldLabel}>رقم الجوال (لـ OTP)</span>
-                  <input
-                    className={styles.input}
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+201XXXXXXXXX"
-                    disabled={loading || otpSent}
-                  />
-                </label>
-
-                {!otpSent ? (
-                  <button type="button" className={`${styles.btn} ${styles.btnGold}`} onClick={handleSendOtp} disabled={loading}>
-                    إرسال رمز التحقق (OTP)
-                  </button>
-                ) : (
-                  <>
-                    <label className={styles.field}>
-                      <span className={styles.fieldLabel}>أدخل رمز OTP</span>
-                      <input
-                        className={styles.input}
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        placeholder="رمز التحقق"
-                        disabled={loading}
-                      />
-                    </label>
-
-                    <div className={styles.actionsRow}>
-                      <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleConfirmOtp} disabled={loading}>
-                        تأكيد OTP
-                      </button>
-                      <button type="button" className={`${styles.btn} ${styles.btnGhost}`} onClick={() => { setOtp(""); setOtpSent(false); setConfirmation(null); setError(null); }} disabled={loading}>
-                        تغيير/إعادة الرقم
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                <div ref={recaptchaRef} id="recaptcha-container" />
-              </div>
-
-              <div className={styles.formFooter}>
-                <button type="button" className={styles.linkBtn} onClick={() => navigate("/register")} disabled={loading}>
-                  إنشاء حساب
-                </button>
-                <button type="button" className={styles.linkBtn} onClick={() => window.history.back()} disabled={loading}>
-                  العودة
-                </button>
-              </div>
-
-              {error && <div role="alert" className={styles.error}>{error}</div>}
-            </div>
-          </form>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <div className={styles.notice}>بعد إدخال بيانات الدخول سيتم إرسال رمز تحقق (OTP) إلى بريدك الإلكتروني أو جوالك للتحقق من هويتك.</div>
-        <div className={styles.copy}>© ANAQA CHIC جميع الحقوق محفوظة</div>
-      </footer>
-    </div>
-  );
-}
+                  className={`${styles.btn} ${styles.btnGhost}`}...
