@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./Login.module.css";
 import ThroneSVG from "./ThroneSVG";
 import ShieldSVG from "./ShieldSVG";
-import OwnerMarquee from "./OwnerMarquee";
 import { auth } from "../firebase/config"; // بالضبط كما طلبت
 import { signInWithPhoneNumber, RecaptchaVerifier, ConfirmationResult } from "firebase/auth";
 import { loginUser } from "../services/authService"; // بالضبط كما طلبت
@@ -14,7 +13,7 @@ type AuthError = { code?: string; message?: string };
 
 export default function Login(): JSX.Element {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth?.() ?? {}; // بعض المشاريع قد لا تعيد refreshUser؛ استخدم optional chaining
+  const { refreshUser } = useAuth?.() ?? {};
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -28,17 +27,8 @@ export default function Login(): JSX.Element {
   const marqueeTimerRef = useRef<number | null>(null);
 
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // create audio element once (public path)
-    try {
-      audioRef.current = new Audio("/sounds/owner-login-alert.mp3");
-      // keep muted by default until played by user gesture; we'll call play() only after successful login
-    } catch {
-      audioRef.current = null;
-    }
-
     return () => {
       if (marqueeTimerRef.current) {
         window.clearTimeout(marqueeTimerRef.current);
@@ -89,25 +79,32 @@ export default function Login(): JSX.Element {
     }
 
     try {
-      // استخدم loginUser من services/authService كما طلبت
       await loginUser(cleanedEmail, password);
 
-      // Refresh user state if hook provides such fn
       try { await refreshUser?.(); } catch { /* ignore */ }
 
-      // إذا الدور المحدد owner، نفّذ مؤثرات إضافية
       if (selectedRole === "owner") {
-        // play audio safely
+        // تشغيل الصوت بالصيغة المطلوبة بالضبط
         try {
-          await audioRef.current?.play().catch(() => { /* swallow */ });
+          const sound = new Audio("/sounds/owner-login-alert.mp3");
+          sound.volume = 0.8;
+          sound.play().catch(() => {});
         } catch {
-          // swallow any playback exception
+          // swallow
         }
-        // show marquee for 20 seconds
+        // تسجيل الحدث في localStorage وبثه للتبويبات المفتوحة
+        try {
+          localStorage.setItem("owner-login-announcement", String(Date.now()));
+        } catch {}
+        try {
+          if (typeof (window as any).BroadcastChannel !== "undefined") {
+            try { new (window as any).BroadcastChannel("owner-login").postMessage({ ts: Date.now() }); } catch {}
+          }
+        } catch {}
         setShowMarquee(true);
         if (marqueeTimerRef.current) window.clearTimeout(marqueeTimerRef.current);
         marqueeTimerRef.current = window.setTimeout(() => setShowMarquee(false), 20000);
-        navigate("/admin"); // حافظنا على التوجيه كما سبق
+        navigate("/admin");
       } else if (selectedRole === "moderator") {
         navigate("/moderator");
       } else {
@@ -180,9 +177,21 @@ export default function Login(): JSX.Element {
       }
       await confirmation.confirm(otp);
       try { await refreshUser?.(); } catch { /* ignore */ }
-      // If owner role selected, show audio & marquee as well
+      // إذا الدور owner، نفّذ الصوت والشريط كما طلبت
       if (selectedRole === "owner") {
-        try { await audioRef.current?.play().catch(() => {}); } catch {}
+        try {
+          const sound = new Audio("/sounds/owner-login-alert.mp3");
+          sound.volume = 0.8;
+          sound.play().catch(() => {});
+        } catch {}
+        try {
+          localStorage.setItem("owner-login-announcement", String(Date.now()));
+        } catch {}
+        try {
+          if (typeof (window as any).BroadcastChannel !== "undefined") {
+            try { new (window as any).BroadcastChannel("owner-login").postMessage({ ts: Date.now() }); } catch {}
+          }
+        } catch {}
         setShowMarquee(true);
         if (marqueeTimerRef.current) window.clearTimeout(marqueeTimerRef.current);
         marqueeTimerRef.current = window.setTimeout(() => setShowMarquee(false), 20000);
@@ -197,16 +206,12 @@ export default function Login(): JSX.Element {
 
   function selectRole(role: "owner" | "moderator") {
     setSelectedRole(role);
-    // scroll login into view for mobile
     const form = document.querySelector(`.${styles.cardLogin}`) as HTMLElement | null;
     form?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   return (
     <div className={styles.page}>
-      {/* Marquee (appears on owner login) */}
-      <OwnerMarquee visible={showMarquee} onClose={() => setShowMarquee(false)} />
-
       <header className={styles.header}>
         <div className={styles.brand}>
           <div className={styles.crown} aria-hidden />
