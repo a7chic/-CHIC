@@ -274,20 +274,22 @@ export default function Login(): JSX.Element {
               </label>
 
               <label className={styles.field}>
-                <span className={styles.fieldLabel}>كلمة المرور</span>
-                <input
-                  id="password"
-                  className={styles.input}
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  disabled={loading}
-                  aria-required
-                />
-                </label>
-                <div className={styles.actionsRow}>
+  <span className={styles.fieldLabel}>كلمة المرور</span>
+
+  <input
+    id="password"
+    className={styles.input}
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="••••••••"
+    autoComplete="current-password"
+    disabled={loading}
+    aria-required="true"
+  />
+</label>
+
+<div className={styles.actionsRow}>
   <button type="submit" className={styles.btn}>
     {loading ? "جاري الدخول..." : "تسجيل الدخول"}
   </button>
