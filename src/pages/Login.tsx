@@ -300,4 +300,13 @@ export default function Login(): JSX.Element {
   >
     إلغاء
   </button>
-</div>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <div ref={recaptchaRef} />
+
+  </div>
+);
+}
